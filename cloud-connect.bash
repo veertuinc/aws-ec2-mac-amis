@@ -40,6 +40,10 @@ cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
 EOD
   launchctl load -w $CLOUD_CONNECT_PLIST_PATH
 else
+  # IF the user wants to change the IP address for the registry domain name (if they want to use a second EC2 registry for better speed), handle setting the /etc/hosts
+  if [[ ! -z "$ANKA_REGISTRY_OVERRIDE_IP" && ! -z "$ANKA_REGISTRY_OVERRIDE_DOMAIN" ]]; then
+      modify_hosts $ANKA_REGISTRY_OVERRIDE_DOMAIN $ANKA_REGISTRY_OVERRIDE_IP
+  fi
   # Ensure that anytime the script stops, we disjoin first
   disjoin() {
     set -x
