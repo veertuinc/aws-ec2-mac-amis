@@ -6,7 +6,7 @@ GETTING_STARTED_LOCATION="$HOME/getting-started"
 # Install Anka
 if [[ ! -d "$HOME/getting-started" ]]; then
   pushd $HOME
-    git clone https://github.com/veertuinc/getting-started.git  
+    git clone https://github.com/veertuinc/getting-started.git
   popd
 fi
 pushd $GETTING_STARTED_LOCATION
