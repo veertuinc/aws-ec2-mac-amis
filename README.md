@@ -19,3 +19,22 @@ What we add, regardless of macOS version:
 2. `cd aws-ec2-mac-amis && ANKA_LICENSE="XXX" ./10.15.7/prepare.bash`
 
 This should install everything you need (the script is indempotent). You can then sanity check and then save the AMI.
+
+## Environment variables you pass in as `user-data`
+
+#### **ANKA_CONTROLLER_ADDRESS**
+- **REQUIRED**
+- Must be in the following structure: `http[s]://[IP/DOMAIN]:[PORT]`
+
+#### **ANKA_JOIN_ARGS**
+- Optional
+- Allows you to pass in any "Flags" from `ankacluster join --help`
+
+#### **ANKA_REGISTRY_OVERRIDE_IP** + **ANKA_REGISTRY_OVERRIDE_DOMAIN**
+Allows you to set the registry IP address and domain in the `/etc/hosts` file
+- Optional
+- Use 1: if your corporate registry doesn't have a public domain name, but does have a public IP
+- Use 2: if you want the EC2 mac mini to pull from a second registry that's hosted on EC2 instead of a local corporate one (AWS -> AWS is much faster)
+
+
+
