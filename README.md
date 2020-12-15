@@ -17,9 +17,14 @@ What we add, regardless of macOS version:
 
 1. `cd /Users/ec2-user && git clone https://github.com/veertuinc/aws-ec2-mac-amis.git`
 2. `cd aws-ec2-mac-amis && ANKA_LICENSE="XXX" ./10.15.7/prepare.bash`
+3. Resizing of the disk may take a while. The instance may seem stuck, so be patient and only create the AMI once it's done (check `/var/log/resize-disk.log` to confirm)
 
 This should install everything you need (the script is indempotent). You can then sanity check and then save the AMI.
 
+## Logs
+
+- `/var/log/resize-disk.log`
+- `/var/log/cloud-connect.log`
 ## Environment variables you pass in as `user-data`
 
 #### **ANKA_CONTROLLER_ADDRESS**

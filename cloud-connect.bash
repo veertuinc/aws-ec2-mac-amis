@@ -5,6 +5,10 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $SCRIPT_DIR
 git pull
 . ./_helpers.bash
+disjoin() {
+  set -x
+  /usr/local/bin/ankacluster disjoin
+}
 # Grab the ENVS the user sets in user-data
 if [[ ! -e $CLOUD_CONNECT_PLIST_PATH ]]; then
   mkdir -p $LAUNCH_LOCATION
@@ -25,7 +29,10 @@ cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
 		<key>RunAtLoad</key>
 		<true/>
 		<key>KeepAlive</key>
-		<true/>
+    <dict>
+      <key>NetworkState</key>
+      <true/>
+    </dict>    
 		<key>ExitTimeOut</key>
 		<integer>300</integer>
     <key>WorkingDirectory</key>
@@ -39,6 +46,7 @@ cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
 EOD
   launchctl load -w $CLOUD_CONNECT_PLIST_PATH
 else
+  echo $(date) " " $(whoami) " Starting..."
   # Check if user-data exists
   [[ ! -z "$(curl -s http://169.254.169.254/latest/user-data | grep 404)" ]] && echo "Could not find required ANKA_CONTROLLER_ADDRESS in instance user-data!" && exit 1
   # create user ENVs for this session
@@ -48,11 +56,7 @@ else
       modify_hosts $ANKA_REGISTRY_OVERRIDE_DOMAIN $ANKA_REGISTRY_OVERRIDE_IP
   fi
   # Ensure that anytime the script stops, we disjoin first
-  disjoin() {
-    set -x
-    /usr/local/bin/ankacluster disjoin
-  }
-  trap disjoin EXIT
+  trap disjoin 0
   /usr/local/bin/ankacluster join $ANKA_CONTROLLER_ADDRESS $ANKA_JOIN_ARGS
   set +x
   while true; do
