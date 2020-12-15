@@ -8,6 +8,8 @@ git pull
 disjoin() {
   set -x
   /usr/local/bin/ankacluster disjoin
+  launchctl unload -w $CLOUD_CONNECT_PLIST_PATH
+  rm -f $CLOUD_CONNECT_PLIST_PATH
 }
 # Grab the ENVS the user sets in user-data
 if [[ ! -e $CLOUD_CONNECT_PLIST_PATH ]]; then
