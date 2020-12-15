@@ -48,7 +48,7 @@ cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
 EOD
   launchctl load -w $CLOUD_CONNECT_PLIST_PATH
 else
-  echo $(date) " " $(whoami) " Starting..."
+  echo "$(date) ($(whoami)): Attempting join..."
   # Check if user-data exists
   [[ ! -z "$(curl -s http://169.254.169.254/latest/user-data | grep 404)" ]] && echo "Could not find required ANKA_CONTROLLER_ADDRESS in instance user-data!" && exit 1
   # create user ENVs for this session
@@ -58,8 +58,8 @@ else
       modify_hosts $ANKA_REGISTRY_OVERRIDE_DOMAIN $ANKA_REGISTRY_OVERRIDE_IP
   fi
   # Ensure that anytime the script stops, we disjoin first
-  trap disjoin 0
   /usr/local/bin/ankacluster join $ANKA_CONTROLLER_ADDRESS $ANKA_JOIN_ARGS
+  trap disjoin 0 # Disjoin after we joined properly to avoid unloading prematurely
   set +x
   while true; do
     sleep 1
