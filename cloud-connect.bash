@@ -6,10 +6,7 @@ cd $SCRIPT_DIR
 git pull
 . ./_helpers.bash
 disjoin() {
-  set -x
   /usr/local/bin/ankacluster disjoin
-  launchctl unload -w $CLOUD_CONNECT_PLIST_PATH
-  rm -f $CLOUD_CONNECT_PLIST_PATH
 }
 # Grab the ENVS the user sets in user-data
 if [[ ! -e $CLOUD_CONNECT_PLIST_PATH ]]; then
@@ -30,10 +27,8 @@ cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
     </array>
 		<key>RunAtLoad</key>
 		<true/>
-		<key>KeepAlive</key>
-    <true/>
     <key>NetworkState</key>
-    <true/>  
+    <true/>
 		<key>ExitTimeOut</key>
 		<integer>300</integer>
     <key>WorkingDirectory</key>
@@ -59,8 +54,4 @@ else
   # Ensure that anytime the script stops, we disjoin first
   /usr/local/bin/ankacluster join $ANKA_CONTROLLER_ADDRESS $ANKA_JOIN_ARGS
   trap disjoin 0 # Disjoin after we joined properly to avoid unloading prematurely
-  set +x
-  while true; do
-    sleep 1
-  done
 fi
