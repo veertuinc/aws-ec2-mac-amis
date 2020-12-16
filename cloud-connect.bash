@@ -31,10 +31,9 @@ cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
 		<key>RunAtLoad</key>
 		<true/>
 		<key>KeepAlive</key>
-    <dict>
-      <key>NetworkState</key>
-      <true/>
-    </dict>    
+    <true/>
+    <key>NetworkState</key>
+    <true/>  
 		<key>ExitTimeOut</key>
 		<integer>300</integer>
     <key>WorkingDirectory</key>
