@@ -54,5 +54,9 @@ else
   fi
   # Ensure that anytime the script stops, we disjoin first
   /usr/local/bin/ankacluster join $ANKA_CONTROLLER_ADDRESS $ANKA_JOIN_ARGS
-  trap disjoin SIGTERM # Disjoin after we joined properly to avoid unloading prematurely
+  trap disjoin 0 # Disjoin after we joined properly to avoid unloading prematurely
+  set +x
+  while true; do
+    sleep 1
+  done
 fi
