@@ -6,6 +6,7 @@ cd $SCRIPT_DIR
 git pull
 . ./_helpers.bash
 disjoin() {
+  set -x
   /usr/local/bin/ankacluster disjoin
 }
 # Grab the ENVS the user sets in user-data
@@ -53,5 +54,5 @@ else
   fi
   # Ensure that anytime the script stops, we disjoin first
   /usr/local/bin/ankacluster join $ANKA_CONTROLLER_ADDRESS $ANKA_JOIN_ARGS
-  trap disjoin 0 # Disjoin after we joined properly to avoid unloading prematurely
+  trap disjoin SIGTERM # Disjoin after we joined properly to avoid unloading prematurely
 fi
