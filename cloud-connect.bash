@@ -3,6 +3,8 @@ set -exo pipefail
 [[ ! $EUID -eq 0 ]] && echo "RUN AS ROOT!" && exit 1
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $SCRIPT_DIR
+echo "Waiting for networking to start..."
+while ! ping -c 1 -n github.com &> /dev/null; do sleep 1; done
 git pull
 . ./_helpers.bash
 disjoin() {
@@ -13,33 +15,29 @@ disjoin() {
 if [[ ! -e $CLOUD_CONNECT_PLIST_PATH ]]; then
   mkdir -p $LAUNCH_LOCATION
 cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-	<dict>
-		<key>Label</key>
-		<string>aws-ec2-mac-amis.cloud-connect</string>
-		<key>ProgramArguments</key>
-		<array>
+  <?xml version="1.0" encoding="UTF-8"?>
+  <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+  <plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>aws-ec2-mac-amis.cloud-connect</string>
+    <key>ProgramArguments</key>
+    <array>
       <string>/usr/bin/env</string>
       <string>bash</string>
       <string>-c</string>
       <string>/Users/ec2-user/aws-ec2-mac-amis/cloud-connect.bash</string>
     </array>
-		<key>RunAtLoad</key>
-		<true/>
-    <key>NetworkState</key>
+    <key>RunAtLoad</key>
     <true/>
-		<key>ExitTimeOut</key>
-		<integer>300</integer>
     <key>WorkingDirectory</key>
     <string>/Users/ec2-user</string>
     <key>StandardErrorPath</key>
     <string>/var/log/cloud-connect.log</string>
     <key>StandardOutPath</key>
     <string>/var/log/cloud-connect.log</string>
-	</dict>
-</plist>
+  </dict>
+  </plist>
 EOD
   launchctl load -w $CLOUD_CONNECT_PLIST_PATH
 else
