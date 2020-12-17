@@ -3,7 +3,7 @@ set -exo pipefail
 [[ ! $EUID -eq 0 ]] && echo "RUN AS ROOT!" && exit 1
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $SCRIPT_DIR
-echo "Waiting for networking to start..."
+echo "Waiting for networking..."
 while ! ping -c 1 -n github.com &> /dev/null; do sleep 1; done
 git pull
 . ./_helpers.bash
