@@ -14,8 +14,8 @@ disjoin() {
   [[ ! -z "$CLOUD_CONNECT_CERT" ]] && CERTS="--cert $CLOUD_CONNECT_CERT"
   [[ ! -z "$CLOUD_CONNECT_KEY" ]] && CERTS="$CERTS --cert-key $CLOUD_CONNECT_KEY"
   [[ ! -z "$CLOUD_CONNECT_CA" ]] && CERTS="$CERTS --cacert $CLOUD_CONNECT_CA"
-  NODE_ID="$(curl -s $CERTS http://$ANKA_CONTROLLER_ADDRESS/api/v1/node | jq -r ".body | .[] | select(.node_name==\"$(hostname)\") | .node_id")"
-  curl -s $CERTS -X DELETE "http://$ANKA_CONTROLLER_ADDRESS/api/v1/node" -H "Content-Type: application/json" -d "{\"node_id\": \"$NODE_ID\"}"
+  NODE_ID="$(curl -s $CERTS "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" | jq -r ".body | .[] | select(.node_name==\"$(hostname)\") | .node_id")"
+  curl -s $CERTS -X DELETE "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" -H "Content-Type: application/json" -d "{\"node_id\": \"$NODE_ID\"}"
 }
 # Grab the ENVS the user sets in user-data
 if [[ ! -e $CLOUD_CONNECT_PLIST_PATH ]]; then
