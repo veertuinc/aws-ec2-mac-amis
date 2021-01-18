@@ -9,6 +9,7 @@ if [[ ! -d "$HOME/getting-started" ]]; then
     git clone https://github.com/veertuinc/getting-started.git
   popd
 fi
+brew install jq # used for cloud-connect api parsing
 pushd $GETTING_STARTED_LOCATION
 git pull
 ANKA_LICENSE=${ANKA_LICENSE:-""}
