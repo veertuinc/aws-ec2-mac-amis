@@ -9,7 +9,6 @@ git pull
 . ./_helpers.bash
 disjoin() {
   set -x
-  /usr/local/bin/ankacluster disjoin &
   CERTS=""
   [[ ! -z "$CLOUD_CONNECT_CERT" ]] && CERTS="--cert $CLOUD_CONNECT_CERT"
   [[ ! -z "$CLOUD_CONNECT_KEY" ]] && CERTS="$CERTS --cert-key $CLOUD_CONNECT_KEY"
@@ -51,7 +50,7 @@ else
   # Check if user-data exists
   [[ ! -z "$(curl -s http://169.254.169.254/latest/user-data | grep 404)" ]] && echo "Could not find required ANKA_CONTROLLER_ADDRESS in instance user-data!" && exit 1
   # create user ENVs for this session
-  $(curl -s http://169.254.169.254/latest/user-data| sed 's/\"//g') 
+  $(curl -s http://169.254.169.254/latest/user-data | sed 's/\"//g') 
   # IF the user wants to change the IP address for the registry domain name (if they want to use a second EC2 registry for better speed), handle setting the /etc/hosts
   if [[ ! -z "$ANKA_REGISTRY_OVERRIDE_IP" && ! -z "$ANKA_REGISTRY_OVERRIDE_DOMAIN" ]]; then
       modify_hosts $ANKA_REGISTRY_OVERRIDE_DOMAIN $ANKA_REGISTRY_OVERRIDE_IP
