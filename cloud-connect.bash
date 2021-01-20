@@ -9,6 +9,7 @@ git pull
 . ./_helpers.bash
 disjoin() {
   set -x
+  /usr/local/bin/ankacluster disjoin &
   CERTS=""
   [[ ! -z "$CLOUD_CONNECT_CERT" ]] && CERTS="--cert $CLOUD_CONNECT_CERT"
   [[ ! -z "$CLOUD_CONNECT_KEY" ]] && CERTS="$CERTS --cert-key $CLOUD_CONNECT_KEY"
@@ -60,6 +61,7 @@ else
   trap disjoin 0 # Disjoin after we joined properly to avoid unloading prematurely
   set +x
   while true; do
-    sleep 1
+    sleep 1 &
+    wait $!
   done
 fi
