@@ -16,6 +16,7 @@ disjoin() {
   [[ ! -z "$CLOUD_CONNECT_CA" ]] && CERTS="$CERTS --cacert $CLOUD_CONNECT_CA"
   NODE_ID="$(curl -s $CERTS "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" | jq -r ".body | .[] | select(.node_name==\"$(hostname)\") | .node_id")"
   curl -s $CERTS -X DELETE "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" -H "Content-Type: application/json" -d "{\"node_id\": \"$NODE_ID\"}"
+  wait $!
 }
 # Grab the ENVS the user sets in user-data
 if [[ ! -e $CLOUD_CONNECT_PLIST_PATH ]]; then
@@ -30,8 +31,6 @@ cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
     <key>ProgramArguments</key>
     <array>
       <string>/usr/bin/env</string>
-      <string>bash</string>
-      <string>-c</string>
       <string>/Users/ec2-user/aws-ec2-mac-amis/cloud-connect.bash</string>
     </array>
     <key>RunAtLoad</key>
@@ -42,6 +41,8 @@ cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
     <string>/var/log/cloud-connect.log</string>
     <key>StandardOutPath</key>
     <string>/var/log/cloud-connect.log</string>
+    <key>ExitTimeOut</key>
+    <string>300</string>
   </dict>
   </plist>
 EOD
