@@ -55,6 +55,8 @@ echo "Dedicated is available!"
 
 Request an instance on the dedicated with:
 
+> For user-data, don't use `;`, `&&` or any other type of separator between envs (see example below for format for ENVs)
+
 ```bash
-aws ec2 run-instances --image-id ami-04bf95d5a9cd66285 --instance-type mac1.metal --placement "HostId=h-0ae72efe1c1cd2954" --ebs-optimized --key-name aws-veertu --security-group-ids sg-0893eeb7c6cae6da4 --user-data "$(echo "export ANKA_CONTROLLER_ADDRESS=\"http://18.237.36.178:8090\"; export ANKA_REGISTRY_OVERRIDE_IP=\"18.237.36.178\"; export ANKA_REGISTRY_OVERRIDE_DOMAIN=\"anka.registry\"" | base64)" --count 1 --block-device-mappings '[{ "DeviceName": "/dev/sda1", "Ebs": { "VolumeSize": 100 }}]'
+aws ec2 run-instances --image-id ami-04bf95d5a9cd66285 --instance-type mac1.metal --placement "HostId=h-0ae72efe1c1cd2954" --key-name aws-veertu --ebs-optimized --security-group-ids sg-0893eeb7c6cae6da4 --user-data "export ANKA_CONTROLLER_ADDRESS=\"http://18.237.36.178:8090\" export ANKA_REGISTRY_OVERRIDE_IP=\"18.237.36.178\" export ANKA_REGISTRY_OVERRIDE_DOMAIN=\"anka.registry\"" --count 1 --block-device-mappings '[{ "DeviceName": "/dev/sda1", "Ebs": { "VolumeSize": 100 }}]'
 ```
