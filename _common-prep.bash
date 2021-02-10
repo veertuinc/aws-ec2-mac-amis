@@ -15,3 +15,17 @@ git pull
 ANKA_LICENSE=${ANKA_LICENSE:-""}
 [[ -z $(command -v anka) ]] && ./install-anka-virtualization-on-mac.bash
 popd
+
+# Disable indexing volumes
+sudo defaults write ~/.Spotlight-V100/VolumeConfiguration.plist Exclusions -array "/Volumes"
+sudo defaults write ~/.Spotlight-V100/VolumeConfiguration.plist Exclusions -array "/Network"
+sudo killall mds
+sleep 60
+sudo mdutil -a -i off /
+sudo mdutil -a -i off
+
+# Enable VNC
+cd /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/
+sudo ./kickstart -configure -allowAccessFor -specifiedUsers
+sudo ./kickstart -configure -allowAccessFor -allUsers -privs -all
+sudo ./kickstart -activate

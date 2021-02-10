@@ -19,12 +19,12 @@ cat > $RESIZE_DISK_PLIST_PATH <<EOD
 		<string>/usr/bin/env</string>
 		<string>bash</string>
 		<string>-c</string>
-		<string>/Users/ec2-user/aws-ec2-mac-amis/resize-disk.bash</string>
+		<string>/Users/$AWS_INSTANCE_USER/aws-ec2-mac-amis/resize-disk.bash</string>
 	</array>
 	<key>RunAtLoad</key>
 	<true/>
 	<key>WorkingDirectory</key>
-	<string>/Users/ec2-user</string>
+	<string>/Users/$AWS_INSTANCE_USER</string>
 	<key>StandardErrorPath</key>
 	<string>/var/log/resize-disk.log</string>
 	<key>StandardOutPath</key>

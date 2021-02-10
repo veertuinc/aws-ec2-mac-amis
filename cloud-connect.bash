@@ -31,12 +31,12 @@ cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
     <key>ProgramArguments</key>
     <array>
       <string>/usr/bin/env</string>
-      <string>/Users/ec2-user/aws-ec2-mac-amis/cloud-connect.bash</string>
+      <string>/Users/$AWS_INSTANCE_USER/aws-ec2-mac-amis/cloud-connect.bash</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
     <key>WorkingDirectory</key>
-    <string>/Users/ec2-user</string>
+    <string>/Users/$AWS_INSTANCE_USER</string>
     <key>StandardErrorPath</key>
     <string>/var/log/cloud-connect.log</string>
     <key>StandardOutPath</key>
