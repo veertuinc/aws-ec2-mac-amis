@@ -29,3 +29,10 @@ cd /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources
 sudo ./kickstart -configure -allowAccessFor -specifiedUsers
 sudo ./kickstart -configure -allowAccessFor -allUsers -privs -all
 sudo ./kickstart -activate
+
+# sleep settings
+sudo systemsetup -setcomputersleep Off
+systemsetup -setcomputersleep Off || true
+sudo pmset -a standby 0
+sudo pmset -a disksleep 0
+sudo pmset -a hibernatemode 0
