@@ -24,6 +24,7 @@ What we add, regardless of macOS version:
     ./enable_autologin "ec2-user" "{GENERATEDPASSWORD}"
     ```
 4. You now need to VNC in once (requirement for Anka to have necessary services): `open vnc://ec2-user:{GENERATEDPASSWORD}@{INSTANCEPUBLICIP}`
+5. Once in VNC, Go to Preferences > Security > under General > uncheck r`equire password after screensave or sleep begins` option.
 
 This should install everything you need (the script is indempotent). You can then sanity check and then save the AMI.
 
@@ -66,7 +67,7 @@ Request an instance on the dedicated with:
 > For user-data, don't use `;`, `&&` or any other type of separator between envs (see example below for format for ENVs)
 
 ```bash
-aws ec2 run-instances --image-id ami-04bf95d5a9cd66285 --instance-type mac1.metal --placement "HostId={HOSTIDHERE}" --key-name aws-veertu --ebs-optimized --security-group-ids sg-0893eeb7c6cae6da4 --user-data "export ANKA_CONTROLLER_ADDRESS=\"http://{CONTROLLER/REGISTRYIP}:8090\" export ANKA_REGISTRY_OVERRIDE_IP=\"{CONTROLLER/REGISTRYIP}\" export ANKA_REGISTRY_OVERRIDE_DOMAIN=\"anka.registry\"" --count 1 --block-device-mappings '[{ "DeviceName": "/dev/sda1", "Ebs": { "VolumeSize": 100 }}]'
+aws ec2 run-instances --image-id ami-04bf95d5a9cd66285 --instance-type mac1.metal --placement "HostId={HOSTIDHERE}" --key-name aws-veertu --ebs-optimized --security-group-ids sg-0893eeb7c6cae6da4 --user-data "export ANKA_CONTROLLER_ADDRESS=\"http://{CONTROLLER/REGISTRYIP}:8090\" export ANKA_REGISTRY_OVERRIDE_IP=\"{CONTROLLER/REGISTRYIP}\" export ANKA_REGISTRY_OVERRIDE_DOMAIN=\"anka.registry\"" --count 1 --block-device-mappings '[{ "DeviceName": "/dev/sda1", "Ebs": { "Iops": "io1", "VolumeSize": 100 }}]'
 ```
 
 After your CI/CD builds/tests complete, and before the EC2 Instance is terminated, you'll need to execute `sudo launchctl unload -w  /Library/LaunchDaemons/com.veertu.aws-ec2-mac-amis.cloud-connect.plist`. This unload will disjoin the node from the controller. Otherwise, you'll see nodes being orphaned as "Offline", requiring manual deletion with the API.
