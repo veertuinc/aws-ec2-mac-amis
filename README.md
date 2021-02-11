@@ -17,7 +17,7 @@ What we add, regardless of macOS version:
 
 1. `cd /Users/ec2-user && git clone https://github.com/veertuinc/aws-ec2-mac-amis.git && cd aws-ec2-mac-amis && ANKA_LICENSE="XXX" ./10.15.7/prepare.bash`
 2. Resizing of the disk may take a while. The instance may seem stuck, so be patient and only create the AMI once it's done (check `/var/log/resize-disk.log` to confirm)
-3. Set password with `/usr/bin/dscl . -passwd /Users/ec2-user {NEWPASSWORDHERE}`. Once set, you can setup auto-login:
+3. Set password with `sudo /usr/bin/dscl . -passwd /Users/ec2-user {NEWPASSWORDHERE}`. Once set, you can setup auto-login:
     ```bash
     git clone https://github.com/veertuinc/kcpassword.git
     cd kcpassword
@@ -68,3 +68,5 @@ Request an instance on the dedicated with:
 ```bash
 aws ec2 run-instances --image-id ami-04bf95d5a9cd66285 --instance-type mac1.metal --placement "HostId={HOSTIDHERE}" --key-name aws-veertu --ebs-optimized --security-group-ids sg-0893eeb7c6cae6da4 --user-data "export ANKA_CONTROLLER_ADDRESS=\"http://{CONTROLLER/REGISTRYIP}:8090\" export ANKA_REGISTRY_OVERRIDE_IP=\"{CONTROLLER/REGISTRYIP}\" export ANKA_REGISTRY_OVERRIDE_DOMAIN=\"anka.registry\"" --count 1 --block-device-mappings '[{ "DeviceName": "/dev/sda1", "Ebs": { "VolumeSize": 100 }}]'
 ```
+
+After your CI/CD builds/tests complete, and before the EC2 Instance is terminated, you'll need to execute `sudo launchctl unload -w  /Library/LaunchDaemons/com.veertu.aws-ec2-mac-amis.cloud-connect.plist`. This unload will disjoin the node from the controller. Otherwise, you'll see nodes being orphaned as "Offline", requiring manual deletion with the API.
