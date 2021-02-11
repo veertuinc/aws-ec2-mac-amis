@@ -25,10 +25,11 @@ sudo mdutil -a -i off /
 sudo mdutil -a -i off
 
 # Enable VNC
-cd /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/
+pushd /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/
 sudo ./kickstart -configure -allowAccessFor -specifiedUsers
 sudo ./kickstart -configure -allowAccessFor -allUsers -privs -all
 sudo ./kickstart -activate
+popd
 
 # sleep settings
 sudo systemsetup -setcomputersleep Off
