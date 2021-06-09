@@ -24,7 +24,7 @@ What we add, regardless of macOS version:
     ./enable_autologin "ec2-user" "{GENERATEDPASSWORD}"
     ```
 4. You now need to VNC in once (requirement for Anka to have necessary services): `open vnc://ec2-user:{GENERATEDPASSWORD}@{INSTANCEPUBLICIP}`
-5. Once in VNC, Go to Preferences > Security > under General > uncheck r`equire password after screensave or sleep begins` option.
+5. Once in VNC, Go to Preferences > Security > under General > uncheck `require password after screensave or sleep begins` option.
 
 This should install everything you need (the script is indempotent). You can then sanity check and then save the AMI.
 
