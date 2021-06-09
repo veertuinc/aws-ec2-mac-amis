@@ -32,6 +32,7 @@ cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
     <array>
       <string>/usr/bin/env</string>
       <string>/Users/$AWS_INSTANCE_USER/aws-ec2-mac-amis/cloud-connect.bash</string>
+      <string>${ANKA_JOIN_ARGS}</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
@@ -58,6 +59,7 @@ else
       modify_hosts $ANKA_REGISTRY_OVERRIDE_DOMAIN $ANKA_REGISTRY_OVERRIDE_IP
   fi
   # Ensure that anytime the script stops, we disjoin first
+  ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS:-"$*"}"
   /usr/local/bin/ankacluster join $ANKA_CONTROLLER_ADDRESS $ANKA_JOIN_ARGS
   trap disjoin 0 # Disjoin after we joined properly to avoid unloading prematurely
   set +x
