@@ -3,7 +3,7 @@ set -exo pipefail
 [[ ! $EUID -eq 0 ]] && echo "RUN AS ROOT!" && exit 1
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $SCRIPT_DIR
-git pull
+git pull || true
 . ./_helpers.bash
 if [[ ! -e $RESIZE_DISK_PLIST_PATH ]]; then
 mkdir -p $LAUNCH_LOCATION
@@ -33,7 +33,7 @@ cat > $RESIZE_DISK_PLIST_PATH <<EOD
 </plist>
 EOD
 launchctl load -w $RESIZE_DISK_PLIST_PATH
-else 
+else
   # Modify the disk
   PDISK=$(diskutil list physical external | head -n1 | cut -d" " -f1)
   APFSCONT=$(diskutil list physical external | grep "Apple_APFS" | tr -s " " | cut -d" " -f8)
