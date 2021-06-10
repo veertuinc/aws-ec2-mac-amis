@@ -57,10 +57,9 @@ Allows you to set the registry IP address and domain in the `/etc/hosts` file
 
 ```bash
 aws ec2 allocate-hosts --availability-zone "us-west-2a" --auto-placement "on" --host-recovery "off" --quantity 1 --instance-type "mac1.metal"
-
-while [[ "{HOSTIDHERE}" != "available" ]]; do echo "Dedicated Availability is still pending... This can take quite a while sometimes..."; sleep 20; done
-echo "Dedicated is available"
 ```
+
+Note: Dedicated requests can take a while
 
 Request an instance on the dedicated with:
 
