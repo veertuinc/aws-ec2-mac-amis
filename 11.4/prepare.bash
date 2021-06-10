@@ -11,6 +11,6 @@ cd $SCRIPT_DIR
 sudo chown -R $AWS_INSTANCE_USER:staff ~/aws-ec2-mac-amis
 
 # Patch for networking issue in AMI
-sudo launchcctl unload /Library/LaunchDaemons/com.veertu.anka.ankanetd.plist
+sudo launchctl unload /Library/LaunchDaemons/com.veertu.anka.ankanetd.plist
 sudo /usr/libexec/PlistBuddy -c 'Add :POSIXSpawnType string Interactive' /Library/LaunchDaemons/com.veertu.anka.ankanetd.plist
 sudo launchctl load /Library/LaunchDaemons/com.veertu.anka.ankanetd.plist
