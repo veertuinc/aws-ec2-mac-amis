@@ -9,8 +9,3 @@ cd $SCRIPT_DIR
 # Create plist for cloud connect # Should be last!
 [[ ! -e $CLOUD_CONNECT_PLIST_PATH ]] && sudo -E bash -c "../cloud-connect.bash"
 sudo chown -R $AWS_INSTANCE_USER:staff ~/aws-ec2-mac-amis
-
-# Patch for networking issue in AMI
-sudo launchctl unload /Library/LaunchDaemons/com.veertu.anka.ankanetd.plist
-sudo /usr/libexec/PlistBuddy -c 'Add :POSIXSpawnType string Interactive' /Library/LaunchDaemons/com.veertu.anka.ankanetd.plist
-sudo launchctl load /Library/LaunchDaemons/com.veertu.anka.ankanetd.plist
