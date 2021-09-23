@@ -5,6 +5,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $SCRIPT_DIR
 echo "Waiting for networking..."
 while ! ping -c 1 -n github.com &> /dev/null; do sleep 1; done
+git clean -fd
 git pull
 . ./_helpers.bash
 disjoin() {
