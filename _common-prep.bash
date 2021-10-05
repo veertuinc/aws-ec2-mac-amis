@@ -31,9 +31,13 @@ sudo ./kickstart -configure -allowAccessFor -allUsers -privs -all
 sudo ./kickstart -activate
 popd
 
-# sleep settings
+# Sleep settings
 sudo systemsetup -setcomputersleep Off
 systemsetup -setcomputersleep Off || true
 sudo pmset -a standby 0
 sudo pmset -a disksleep 0
 sudo pmset -a hibernatemode 0
+
+# Optimizations for templates
+anka config chunk_size 2147483648
+sudo anka config chunk_size 2147483648
