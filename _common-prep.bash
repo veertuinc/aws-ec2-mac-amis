@@ -10,11 +10,11 @@ if [[ ! -d "$HOME/getting-started" ]]; then
   popd
 fi
 brew install jq # used for cloud-connect api parsing
-# pushd $GETTING_STARTED_LOCATION
-# git pull
-# ANKA_LICENSE=${ANKA_LICENSE:-""}
-# [[ -z $(command -v anka) ]] && ./install-anka-virtualization-on-mac.bash
-# popd
+pushd $GETTING_STARTED_LOCATION
+git pull
+ANKA_LICENSE=${ANKA_LICENSE:-""}
+[[ -z $(command -v anka) ]] && ./install-anka-virtualization-on-mac.bash
+popd
 
 # Disable indexing volumes
 sudo defaults write ~/.Spotlight-V100/VolumeConfiguration.plist Exclusions -array "/Volumes"
