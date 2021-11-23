@@ -52,6 +52,7 @@ Allows you to set the registry IP address and domain in the `/etc/hosts` file
 #### **ANKA_LICENSE** (only available in 2.5.4 AMIs)
 If not already licensed, the cloud-connect service will license Anka using this ENV's value.
 - Optional
+- You can also update invalid/expired licenses with this.
 
 ## Usage of AMI
 
