@@ -49,6 +49,9 @@ Allows you to set the registry IP address and domain in the `/etc/hosts` file
 - Use 1: if your corporate registry doesn't have a public domain name, but does have a public IP
 - Use 2: if you want the EC2 mac mini to pull from a second registry that's hosted on EC2 instead of a local corporate one (AWS -> AWS is much faster)
 
+#### **ANKA_LICENSE** (Only available in 2.5.4 AMIs)
+If not already licensed, the cloud-connect service will license Anka using this ENV's value.
+- Optional
 
 ## Usage of AMI
 

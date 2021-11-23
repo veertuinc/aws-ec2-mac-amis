@@ -55,12 +55,20 @@ else
   $(curl -s http://169.254.169.254/latest/user-data | grep "ANKA_" | sed 's/\"//g')
   # IF the user wants to change the IP address for the registry domain name (if they want to use a second EC2 registry for better speed), handle setting the /etc/hosts
   if [[ ! -z "$ANKA_REGISTRY_OVERRIDE_IP" && ! -z "$ANKA_REGISTRY_OVERRIDE_DOMAIN" ]]; then
-      modify_hosts $ANKA_REGISTRY_OVERRIDE_DOMAIN $ANKA_REGISTRY_OVERRIDE_IP
+    modify_hosts $ANKA_REGISTRY_OVERRIDE_DOMAIN $ANKA_REGISTRY_OVERRIDE_IP
   fi
   # Ensure that anytime the script stops, we disjoin first
   ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS:-"$*"}"
   curl -O ${ANKA_CONTROLLER_ADDRESS}/pkg/AnkaAgent.pkg && installer -pkg AnkaAgent.pkg -tgt / && rm -f AnkaAgent.pkg
   anka license accept-eula 2>/dev/null || true
+  if [[ -n "${ANKA_LICENSE}" ]]; then # Activate license if present
+    anka license show
+    if ! anka --machine-readable license show | grep 'status": "valid"'; then
+      echo "Activating anka license..."
+      anka license activate -f "${ANKA_LICENSE}" || true
+    fi
+    anka license show
+  fi
   /usr/local/bin/ankacluster join $ANKA_CONTROLLER_ADDRESS $ANKA_JOIN_ARGS
   trap disjoin 0 # Disjoin after we joined properly to avoid unloading prematurely
   set +x

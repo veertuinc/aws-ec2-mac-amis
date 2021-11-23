@@ -3,7 +3,6 @@ set -exo pipefail
 [[ ! $EUID -eq 0 ]] && echo "RUN AS ROOT!" && exit 1
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $SCRIPT_DIR
-git pull || true
 . ./_helpers.bash
 if [[ ! -e $RESIZE_DISK_PLIST_PATH ]]; then
 mkdir -p $LAUNCH_LOCATION
