@@ -15,7 +15,7 @@ What we add, regardless of macOS version:
 
 ## Prepare an AMI
 
-1. `cd /Users/ec2-user && git clone https://github.com/veertuinc/aws-ec2-mac-amis.git && cd aws-ec2-mac-amis && ANKA_LICENSE="XXX" ./$(sw_vers | grep ProductVersion | cut -d: -f2 | xargs)/prepare.bash`
+1. `cd /Users/ec2-user && git clone https://github.com/veertuinc/aws-ec2-mac-amis.git && cd aws-ec2-mac-amis && ANKA_LICENSE="skip" ./$(sw_vers | grep ProductVersion | cut -d: -f2 | xargs)/prepare.bash`
 2. Resizing of the disk may take a while. The instance may seem stuck, so be patient and only create the AMI once it's done (check `/var/log/resize-disk.log` to confirm)
 3. Set password with `sudo /usr/bin/dscl . -passwd /Users/ec2-user {NEWPASSWORDHERE}`.
 4. ~~Once set, you can setup auto-login:~~ No longer needed in Anka 2.5.X.
