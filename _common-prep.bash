@@ -41,3 +41,7 @@ sudo pmset -a hibernatemode 0
 # Optimizations for templates
 anka config chunk_size 2147483648
 sudo anka config chunk_size 2147483648
+
+# Required to create necessary folders | No such file or directory: '/var/root/Library/Application Support/Veertu/Anka/img_lib/' from agent
+anka create test && anka delete --yes test
+sudo anka create test && sudo anka delete --yes test
