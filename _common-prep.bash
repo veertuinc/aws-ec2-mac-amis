@@ -23,6 +23,8 @@ sudo killall mds
 sleep 60
 sudo mdutil -a -i off /
 sudo mdutil -a -i off
+sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.metadata.mds.plist
+sudo rm -rf /.Spotlight-V100/*
 
 # Enable VNC
 pushd /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/
