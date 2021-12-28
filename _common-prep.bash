@@ -53,3 +53,6 @@ sudo cat << EOF | sudo tee /etc/ssh/sshd_config.d/051-anka.conf
 ClientAliveInterval 900
 ClientAliveCountMax 220
 EOF
+
+# syslog spam com.apple.xpc.launchd[1] (com.apple.wifi.WiFiAgent): Service only ran for 0 seconds. Pushing respawn out by 10 seconds.
+launchctl unload -w /System/Library/LaunchAgents/com.apple.wifi.WiFiAgent.plist
