@@ -47,3 +47,9 @@ sudo anka config chunk_size 2147483648
 # Required to create necessary folders | No such file or directory: '/var/root/Library/Application Support/Veertu/Anka/img_lib/' from agent
 anka create test && anka delete --yes test
 sudo anka create test && sudo anka delete --yes test
+
+# SSH will break with Broken pipe when doing anka create
+sudo cat << EOF | sudo tee /etc/ssh/sshd_config.d/50-anka.conf
+ClientAliveInterval 100
+ClientAliveMaxCount 220
+EOF
