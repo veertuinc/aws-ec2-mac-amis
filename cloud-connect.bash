@@ -73,9 +73,15 @@ else
   fi
   /usr/local/bin/ankacluster disjoin || true
   /usr/local/bin/ankacluster join $ANKA_CONTROLLER_ADDRESS $ANKA_JOIN_ARGS
-  trap disjoin SIGKILL # Disjoin after we joined properly to orphaned nodes
-  trap disjoin SIGTERM
+  trap disjoin 0 # Disjoin after we joined properly to avoid unloading prematurely
   set +x
-  tail -f /dev/null &
-  wait $!
+  while true; do
+    # TODO: Check if Finder is quit and send disjoin
+    if ! ps aux | grep "Finder.app"; then
+      echo "NO FINDER"
+      exit 0
+    fi
+    sleep 1 &
+    wait $!
+  done
 fi
