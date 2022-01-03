@@ -7,6 +7,7 @@ echo "Waiting for networking..."
 while ! ping -c 1 -n github.com &> /dev/null; do sleep 1; done
 . ./_helpers.bash
 disjoin() {
+  echo "$(date) $(whoami) Received a signal to shutdown"
   set -x
   /usr/local/bin/ankacluster disjoin &
   CERTS=""
@@ -72,10 +73,9 @@ else
   fi
   /usr/local/bin/ankacluster disjoin || true
   /usr/local/bin/ankacluster join $ANKA_CONTROLLER_ADDRESS $ANKA_JOIN_ARGS
-  trap disjoin 0 # Disjoin after we joined properly to avoid unloading prematurely
+  trap disjoin SIGKILL # Disjoin after we joined properly to orphaned nodes
+  trap disjoin SIGTERM
   set +x
-  while true; do
-    sleep 1 &
-    wait $!
-  done
+  tail -f /dev/null &
+  wait $!
 fi
