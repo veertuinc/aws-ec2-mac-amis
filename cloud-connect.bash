@@ -70,6 +70,7 @@ else
     fi
     anka license show
   fi
+  /usr/local/bin/ankacluster disjoin || true
   /usr/local/bin/ankacluster join $ANKA_CONTROLLER_ADDRESS $ANKA_JOIN_ARGS
   trap disjoin 0 # Disjoin after we joined properly to avoid unloading prematurely
   set +x
