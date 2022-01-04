@@ -75,8 +75,9 @@ else
   /usr/local/bin/ankacluster join $ANKA_CONTROLLER_ADDRESS $ANKA_JOIN_ARGS
   trap disjoin 0 # Disjoin after we joined properly to avoid unloading prematurely
   set +x
-  while true; do
-    sleep 1 &
-    wait $!
-  done
+  mkfifo /tmp/wait-fifo; read < /tmp/wait-fifo
+  # while true; do
+  #   sleep 1 &
+  #   wait $!
+  # done
 fi
