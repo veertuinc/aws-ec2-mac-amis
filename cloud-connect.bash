@@ -75,9 +75,6 @@ else
   /usr/local/bin/ankacluster join $ANKA_CONTROLLER_ADDRESS $ANKA_JOIN_ARGS
   trap disjoin 0 # Disjoin after we joined properly to avoid unloading prematurely
   set +x
+  echo "Joined and now we'll stay alive and wait for a shutdown signal..."
   mkfifo /tmp/wait-fifo; read < /tmp/wait-fifo
-  # while true; do
-  #   sleep 1 &
-  #   wait $!
-  # done
 fi
