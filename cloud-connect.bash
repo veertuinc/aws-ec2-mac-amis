@@ -9,6 +9,7 @@ while ! ping -c 1 -n github.com &> /dev/null; do sleep 1; done
 disjoin() {
   echo "$(date) $(whoami) Received a signal to shutdown"
   set -x
+  rm -f /tmp/wait-fifo
   /usr/local/bin/ankacluster disjoin &
   CERTS=""
   [[ ! -z "$CLOUD_CONNECT_CERT" ]] && CERTS="--cert $CLOUD_CONNECT_CERT"
