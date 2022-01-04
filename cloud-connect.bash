@@ -76,11 +76,6 @@ else
   trap disjoin 0 # Disjoin after we joined properly to avoid unloading prematurely
   set +x
   while true; do
-    # TODO: Check if Finder is quit and send disjoin
-    if ! ps aux | grep "Finder.app"; then
-      echo "NO FINDER"
-      exit 0
-    fi
     sleep 1 &
     wait $!
   done
