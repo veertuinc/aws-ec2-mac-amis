@@ -56,12 +56,14 @@ else
   sudo sed -i '' "/anka.registry/d" /etc/hosts # Remove hosts modifications for automation (INTERNAL ONLY)
   # create user ENVs for this session
   $(curl -s http://169.254.169.254/latest/user-data | grep "ANKA_" | sed 's/\"//g')
+  INSTANCE_ID="$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
   # IF the user wants to change the IP address for the registry domain name (if they want to use a second EC2 registry for better speed), handle setting the /etc/hosts
   if [[ ! -z "$ANKA_REGISTRY_OVERRIDE_IP" && ! -z "$ANKA_REGISTRY_OVERRIDE_DOMAIN" ]]; then
     modify_hosts $ANKA_REGISTRY_OVERRIDE_DOMAIN $ANKA_REGISTRY_OVERRIDE_IP
   fi
   # Ensure that anytime the script stops, we disjoin first
   ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS:-"$*"}"
+  [[ ! "${ANKA_JOIN_ARGS}" =~ "--node-id" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --node-id ${INSTANCE_ID}"
   curl -O ${ANKA_CONTROLLER_ADDRESS}/pkg/AnkaAgent.pkg && installer -pkg AnkaAgent.pkg -tgt / && rm -f AnkaAgent.pkg
   anka license accept-eula 2>/dev/null || true
   if [[ -n "${ANKA_LICENSE}" ]]; then # Activate license if present
