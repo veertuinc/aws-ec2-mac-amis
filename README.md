@@ -32,7 +32,7 @@ The public AMIs in AWS have these steps already performed inside of them. Howeve
 7. Test `anka create` using generate getting-started scripts
 8. Ensure cloud connect service works with user-data
 9. Restart without user-data & remove any licenses used in testing
-10. As user AND root: `echo "" | sudo tee /Library/Logs/Anka/anka.log; rm -f ~/.ssh/authorized_keys; rm -f ~/.zsh_history; rm -f ~/.bash_history; rm -f /Applications/Install*`
+10. As user AND root: `echo "" | sudo tee /Library/Logs/Anka/anka.log; echo "" | sudo tee /var/log/cloud-connect.log rm -f ~/.ssh/authorized_keys; rm -f ~/.zsh_history; rm -f ~/.bash_history; sudo rm -rf /Applications/Install*`
 
 This should install everything you need (the script is indempotent). You can then sanity check and then save the AMI.
 
