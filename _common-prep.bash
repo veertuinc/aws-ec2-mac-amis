@@ -19,7 +19,7 @@ popd
 # Disable indexing volumes
 sudo defaults write ~/.Spotlight-V100/VolumeConfiguration.plist Exclusions -array "/Volumes"
 sudo defaults write ~/.Spotlight-V100/VolumeConfiguration.plist Exclusions -array "/Network"
-sudo killall mds
+sudo killall mds || true
 sleep 60
 sudo mdutil -a -i off /
 sudo mdutil -a -i off
@@ -55,4 +55,4 @@ ClientAliveCountMax 220
 EOF
 
 # syslog spam com.apple.xpc.launchd[1] (com.apple.wifi.WiFiAgent): Service only ran for 0 seconds. Pushing respawn out by 10 seconds.
-launchctl unload -w /System/Library/LaunchAgents/com.apple.wifi.WiFiAgent.plist
+launchctl unload -w /System/Library/LaunchAgents/com.apple.wifi.WiFiAgent.plist || true
