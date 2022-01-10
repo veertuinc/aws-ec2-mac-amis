@@ -29,12 +29,14 @@ The public AMIs in AWS have these steps already performed inside of them. Howeve
 4. You now need to VNC in once (requirement for Anka to have necessary services): `open vnc://ec2-user:{GENERATEDPASSWORD}@{INSTANCEPUBLICIP}`
 5. Once in VNC, Go to Preferences > Security > under General > uncheck `require password after screensave or sleep begins` option.
 6. Next, under Energy Saver set `Turn display off after` to `Never`
-7. Test `anka create` using generate getting-started scripts
+7. Test `anka create` using generate getting-started scripts + delete VM it creates after starting and running command inside
 8. Ensure cloud connect service works with user-data
 9. Restart without user-data & remove any licenses used in testing
-10. As user AND root: `echo "" | sudo tee /Library/Logs/Anka/anka.log; echo "" | sudo tee /var/log/cloud-connect.log rm -f ~/.ssh/authorized_keys; rm -f ~/.zsh_history; rm -f ~/.bash_history; sudo rm -rf /Applications/Install*`
+10. Remove license `sudo anka license remove`
+10. As user AND root: `echo "" | sudo tee /Library/Logs/Anka/anka.log; echo "" | sudo tee /var/log/cloud-connect.log rm -f ~/.ssh/authorized_keys; rm -f ~/.*_history; rm -f ~/.bash_history; sudo rm -rf /tmp/anka-mac-resources; sudo rm -rf /Applications/Install*`
 
 This should install everything you need (the script is indempotent). You can then sanity check and then save the AMI.
+
 
 ## Logs
 
