@@ -10,3 +10,5 @@ cd $SCRIPT_DIR
 [[ ! -e $CLOUD_CONNECT_PLIST_PATH ]] && sudo -E bash -c "../cloud-connect.bash"
 sudo chown -R $AWS_INSTANCE_USER:staff ~/aws-ec2-mac-amis
 # sudo anka config vmx_mitigations 0 # Apple has locked this and it can no longer be modified
+echo ""
+echo "]] SUCCESS"
