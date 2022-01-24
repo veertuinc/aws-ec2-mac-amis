@@ -31,12 +31,26 @@ The public AMIs in AWS have these steps already performed inside of them. Howeve
 6. Next, under Energy Saver set `Turn display off after` to `Never`
 7. Test `anka create` using generate getting-started scripts + delete VM it creates after starting and running command inside
 8. Ensure cloud connect service works with user-data
-9. Restart without user-data & remove any licenses used in testing
+9. Restart without user-data
 10. Remove license `sudo anka license remove`
-10. As user AND root: `echo "" | sudo tee /Library/Logs/Anka/anka.log; echo "" | sudo tee /var/log/cloud-connect.log rm -f ~/.ssh/authorized_keys; rm -f ~/.*_history; rm -f ~/.bash_history; sudo rm -rf /tmp/anka-mac-resources; sudo rm -rf /Applications/Install*`
+10. As user **AND** root:
+
+  ```bash
+  anka delete --yes --all;
+  echo "" | tee /Library/Logs/Anka/anka.log; 
+  echo "" | tee /var/log/cloud-connect.log;
+  echo "" | tee /var/log/resize-disk.log; 
+  rm -f ~/.ssh/authorized_keys; 
+  rm -f ~/.*_history; 
+  rm -f ~/.bash_history; 
+  rm -rf /tmp/anka-mac-resources; 
+  rm -rf /Applications/Install*;
+  find "$(anka config img_lib_dir)" -mindepth 1 -delete;
+  find "$(anka config state_lib_dir)" -mindepth 1 -delete;
+  find "$(anka config vm_lib_dir)" -mindepth 1 -delete;
+  ```
 
 This should install everything you need (the script is indempotent). You can then sanity check and then save the AMI.
-
 
 ## Logs
 
