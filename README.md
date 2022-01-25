@@ -5,7 +5,6 @@ All AMIs are built from the default AWS AMIs.
 >
 > Root device type: ebs | Virtualization type: hvm | ENA Enabled: Yes
 
-
 What we add, regardless of macOS version:
 
 - [`anka virtualization`](https://veertu.com/anka-build/)
@@ -50,7 +49,7 @@ The public AMIs in AWS have these steps already performed inside of them. Howeve
   find "$(anka config vm_lib_dir)" -mindepth 1 -delete;
   ```
 
-This should install everything you need (the script is indempotent). You can then sanity check and then save the AMI.
+This should install everything you need (the script is idempotent). You can then sanity check and then save the AMI.
 
 ## Logs
 
@@ -94,7 +93,7 @@ Request an instance on the dedicated with:
 > For user-data, don't use `;`, `&&` or any other type of separator between envs (see example below for format for ENVs)
 
 ```bash
-aws ec2 run-instances --image-id ami-04bf95d5a9cd66285 --instance-type mac1.metal --placement "HostId={HOSTIDHERE}" --key-name aws-veertu --ebs-optimized --associate-public-ip-address --security-group-ids sg-0893eeb7c6cae6da4 --user-data "export ANKA_CONTROLLER_ADDRESS=\"http://{CONTROLLER/REGISTRYIP}:8090\" export ANKA_REGISTRY_OVERRIDE_IP=\"{CONTROLLER/REGISTRYIP}\" export ANKA_REGISTRY_OVERRIDE_DOMAIN=\"anka.registry\"" --count 1 --block-device-mappings '[{ "DeviceName": "/dev/sda1", "Ebs": { "VolumeSize": 400, "VolumeType": "gp3" }}]'
+aws ec2 run-instances --image-id ami-04bf95d5a9cd66285 --instance-type mac1.metal --placement "HostId={HOSTIDHERE}" --key-name aws-veertu --ebs-optimized --associate-public-ip-address --security-group-ids sg-0893eeb7c6cae6da4 --user-data "export ANKA_CONTROLLER_ADDRESS=\"http://{CONTROLLER/REGISTRYIP}:8090\" export ANKA_REGISTRY_OVERRIDE_IP=\"{CONTROLLER/REGISTRYIP}\" export ANKA_REGISTRY_OVERRIDE_DOMAIN=\"anka.registry\"" --count 1 --block-device-mappings '[{ "DeviceName": "/dev/sda1", "Ebs": { "VolumeSize": 500, "VolumeType": "gp3" }}]'
 ```
 
 After your CI/CD builds/tests complete, and before the EC2 Instance is terminated, you'll need to execute `sudo launchctl unload -w  /Library/LaunchDaemons/com.veertu.aws-ec2-mac-amis.cloud-connect.plist`. This unload will disjoin the node from the controller. Otherwise, you'll see nodes being orphaned as "Offline", requiring manual deletion with the API.
