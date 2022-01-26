@@ -26,11 +26,11 @@ The public AMIs in AWS have these steps already performed inside of them. Howeve
     ./enable_autologin "ec2-user" "{GENERATEDPASSWORD}"
     ```
 5. You now need to VNC in once (requirement for Anka to have necessary services): `open vnc://ec2-user:{GENERATEDPASSWORD}@{INSTANCEPUBLICIP}`
-5. Test `anka create` using generate getting-started scripts + delete VM it creates after starting and running command inside
-6. Ensure cloud connect service works with user-data
-7. Restart without user-data
-8. Remove license `sudo anka license remove`
-9. As user **AND** root:
+6. Test `anka create` using generate getting-started scripts + delete VM it creates after starting and running command inside
+7. Ensure cloud connect service works with user-data
+8. Restart without user-data
+9. Remove license `sudo anka license remove`
+10. As user **AND** root:
 
   ```bash
   anka delete --yes --all;
