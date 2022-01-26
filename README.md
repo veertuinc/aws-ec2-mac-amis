@@ -81,7 +81,8 @@ Note: Dedicated requests can take a while
 
 Request an instance on the dedicated with:
 
-> For user-data, don't use `;`, `&&` or any other type of separator between envs (see example below for format for ENVs)
+> - For user-data, don't use `;`, `&&` or any other type of separator between envs (see example below for format for ENVs)
+> - If you pass in user-data with the exports all on one line, and have non ANKA_ ENVs you're setting, the `cloud-connect.bash` will source/execute them. We recommend you split exports and user-data onto separate lines to avoid this.
 
 ```bash
 aws ec2 run-instances --image-id {AMI_ID_HERE} --instance-type mac1.metal --placement "HostId={HOSTIDHERE}" --key-name aws-veertu --ebs-optimized --associate-public-ip-address --security-group-ids sg-0893eeb7c6cae6da4 --user-data "export ANKA_CONTROLLER_ADDRESS=\"http://{CONTROLLER/REGISTRYIP}:8090\" export ANKA_REGISTRY_OVERRIDE_IP=\"{CONTROLLER/REGISTRYIP}\" export ANKA_REGISTRY_OVERRIDE_DOMAIN=\"anka.registry\"" --count 1 --block-device-mappings '[{ "DeviceName": "/dev/sda1", "Ebs": { "VolumeSize": 500, "VolumeType": "gp3" }}]'
