@@ -64,6 +64,7 @@ else
   # Join arguments
   ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS:-"$*"}"
   [[ ! "${ANKA_JOIN_ARGS}" =~ "--node-id" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --node-id ${INSTANCE_ID}"
+  [[ ! "${ANKA_JOIN_ARGS}" =~ "--name" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --name ${INSTANCE_ID}"
   [[ ! "${ANKA_JOIN_ARGS}" =~ "--reserve-space" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --reserve-space 20GB"
   # Anka agent install to handle it failing
   curl -O ${ANKA_CONTROLLER_ADDRESS}/pkg/AnkaAgent.pkg && installer -pkg AnkaAgent.pkg -tgt / && rm -f AnkaAgent.pkg
