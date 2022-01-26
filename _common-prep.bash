@@ -33,7 +33,8 @@ sudo ./kickstart -configure -allowAccessFor -allUsers -privs -all
 sudo ./kickstart -activate
 popd
 
-# Sleep settings
+# Sleep settings ; MAY BE USELESS AS AMIS DON'T SAVE NVRAM SETTINGS
+sudo systemsetup -setsleep Never || true
 sudo systemsetup -setcomputersleep Off
 systemsetup -setcomputersleep Off || true
 sudo pmset -a standby 0
@@ -60,3 +61,23 @@ launchctl unload -w /System/Library/LaunchAgents/com.apple.wifi.WiFiAgent.plist 
 # Performance related changes
 anka config block_nocache 0
 sudo anka config block_nocache 0
+
+# Disable sleep and screensaver so we don't need to disable "Require password after sleep or screensaver begins"
+sudo cat << EOF | sudo tee -a /usr/local/aws/ec2-macos-init/init.toml
+[[Module]]
+    Name = "DisableScreenSaver"
+    PriorityGroup = 2 # Second group
+    RunPerBoot = true # Run every boot
+    FatalOnError = false # Best effort, don't fatal on error
+    [Module.Command]
+        Cmd = ["/bin/zsh", "-c", 'sudo defaults write com.apple.screensaver idleTime 0']
+EOF
+sudo cat << EOF | sudo tee -a /usr/local/aws/ec2-macos-init/init.toml
+[[Module]]
+    Name = "DisableSleep"
+    PriorityGroup = 2 # Second group
+    RunPerBoot = true # Run every boot
+    FatalOnError = false # Best effort, don't fatal on error
+    [Module.Command]
+        Cmd = ["/bin/zsh", "-c", 'sudo systemsetup -setsleep Never']
+EOF
