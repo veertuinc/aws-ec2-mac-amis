@@ -66,7 +66,7 @@ sudo anka config block_nocache 0
 sudo cat << EOF | sudo tee -a /usr/local/aws/ec2-macos-init/init.toml
 [[Module]]
     Name = "DisableScreenSaver"
-    PriorityGroup = 2 # Second group
+    PriorityGroup = 4
     RunPerBoot = true # Run every boot
     FatalOnError = false # Best effort, don't fatal on error
     [Module.Command]
@@ -75,7 +75,7 @@ EOF
 sudo cat << EOF | sudo tee -a /usr/local/aws/ec2-macos-init/init.toml
 [[Module]]
     Name = "DisableSleep"
-    PriorityGroup = 2 # Second group
+    PriorityGroup = 4
     RunPerBoot = true # Run every boot
     FatalOnError = false # Best effort, don't fatal on error
     [Module.Command]
