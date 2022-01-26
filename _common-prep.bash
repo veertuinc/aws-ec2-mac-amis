@@ -34,12 +34,13 @@ sudo ./kickstart -activate
 popd
 
 # Sleep settings ; MAY BE USELESS AS AMIS DON'T SAVE NVRAM SETTINGS
-sudo systemsetup -setsleep Never || true
+sudo systemsetup -setsleep Never
 sudo systemsetup -setcomputersleep Off
 systemsetup -setcomputersleep Off || true
 sudo pmset -a standby 0
 sudo pmset -a disksleep 0
 sudo pmset -a hibernatemode 0
+defaults write com.apple.screensaver idleTime 0
 
 # Optimizations for templates
 anka config chunk_size 2147483648
@@ -70,7 +71,7 @@ sudo cat << EOF | sudo tee -a /usr/local/aws/ec2-macos-init/init.toml
     RunPerBoot = true # Run every boot
     FatalOnError = false # Best effort, don't fatal on error
     [Module.Command]
-        Cmd = ["/bin/zsh", "-c", 'sudo defaults write com.apple.screensaver idleTime 0']
+        Cmd = ["/bin/zsh", "-c", 'defaults write com.apple.screensaver idleTime 0']
 EOF
 sudo cat << EOF | sudo tee -a /usr/local/aws/ec2-macos-init/init.toml
 [[Module]]
