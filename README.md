@@ -33,7 +33,7 @@ The public AMIs in AWS have these steps already performed inside of them. Howeve
   echo "" | tee /var/log/resize-disk.log; 
   rm -f ~/.ssh/authorized_keys; 
   rm -f ~/.*_history; 
-  history -p;history -c;
+  history -p;
   rm -rf /tmp/anka-mac-resources; 
   rm -rf /Applications/Install*;
   rm -rf ~/.zsh_*;
