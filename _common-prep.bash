@@ -1,3 +1,4 @@
+unset HISTFILE
 GETTING_STARTED_LOCATION="$HOME/getting-started"
 # POPULATE .zshrc
 [[ -z "$(grep "alias ll" $HOME/.zshrc)" ]] && echo "" >> $HOME/.zshrc && echo "alias ll=\"ls -laht\"" >> $HOME/.zshrc
