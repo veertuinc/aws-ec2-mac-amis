@@ -57,6 +57,9 @@ else
   # create user ENVs for this session
   eval "$(curl -s http://169.254.169.254/latest/user-data | grep "ANKA_")" # EVAL needed to handle quotes wrapping ARGS ENV
   INSTANCE_ID="$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
+  ANKA_USE_PUBLIC_IP=${ANKA_USE_PUBLIC_IP:-false}
+  INSTANCE_PRIVATE_IP="$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)"
+  INSTANCE_PUBLIC_IP="$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)"
   # IF the user wants to change the IP address for the registry domain name (if they want to use a second EC2 registry for better speed), handle setting the /etc/hosts
   if [[ ! -z "$ANKA_REGISTRY_OVERRIDE_IP" && ! -z "$ANKA_REGISTRY_OVERRIDE_DOMAIN" ]]; then
     modify_hosts $ANKA_REGISTRY_OVERRIDE_DOMAIN $ANKA_REGISTRY_OVERRIDE_IP
@@ -65,6 +68,8 @@ else
   ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS:-"$*"}" # used for getting started + overriding defaults
   [[ ! "${ANKA_JOIN_ARGS}" =~ "--node-id" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --node-id ${INSTANCE_ID}"
   [[ ! "${ANKA_JOIN_ARGS}" =~ "--reserve-space" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --reserve-space 20GB"
+  ${ANKA_USE_PUBLIC_IP} && INSTANCE_IP="${INSTANCE_PUBLIC_IP}" || INSTANCE_IP="${INSTANCE_PRIVATE_IP}"
+  [[ ! "${ANKA_JOIN_ARGS}" =~ "--host" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --host ${INSTANCE_IP}"
   # Anka agent install to handle it failing
   curl -O ${ANKA_CONTROLLER_ADDRESS}/pkg/AnkaAgent.pkg && installer -pkg AnkaAgent.pkg -tgt / && rm -f AnkaAgent.pkg
   anka license accept-eula 2>/dev/null || true
