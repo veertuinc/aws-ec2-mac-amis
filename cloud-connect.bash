@@ -59,7 +59,7 @@ else
   INSTANCE_ID="$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
   ANKA_USE_PUBLIC_IP=${ANKA_USE_PUBLIC_IP:-false}
   INSTANCE_PRIVATE_IP="$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)"
-  INSTANCE_PUBLIC_IP="$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)"
+  INSTANCE_PUBLIC_IP="$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)"
   # IF the user wants to change the IP address for the registry domain name (if they want to use a second EC2 registry for better speed), handle setting the /etc/hosts
   if [[ ! -z "$ANKA_REGISTRY_OVERRIDE_IP" && ! -z "$ANKA_REGISTRY_OVERRIDE_DOMAIN" ]]; then
     modify_hosts $ANKA_REGISTRY_OVERRIDE_DOMAIN $ANKA_REGISTRY_OVERRIDE_IP
