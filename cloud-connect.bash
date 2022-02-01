@@ -62,7 +62,7 @@ else
     modify_hosts $ANKA_REGISTRY_OVERRIDE_DOMAIN $ANKA_REGISTRY_OVERRIDE_IP
   fi
   # Join arguments
-  ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS:-"$*"}"
+  ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS:-"$*"}" # used for getting started + overriding defaults
   [[ ! "${ANKA_JOIN_ARGS}" =~ "--node-id" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --node-id ${INSTANCE_ID}"
   [[ ! "${ANKA_JOIN_ARGS}" =~ "--reserve-space" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --reserve-space 20GB"
   # Anka agent install to handle it failing
@@ -77,6 +77,7 @@ else
     anka license show
   fi
   /usr/local/bin/ankacluster disjoin || true
+  sleep 10 # AWS instances, on first start, and even with functional networking (we ping github.com above), will have 169.254.169.254 assigned to the default interface and since joining happens very early in the startup process, that'll be what is assigned in the controller and cause problems.
   /usr/local/bin/ankacluster join $ANKA_CONTROLLER_ADDRESS $ANKA_JOIN_ARGS
   trap disjoin 0 # Disjoin after we joined properly to avoid unloading prematurely
   set +x
