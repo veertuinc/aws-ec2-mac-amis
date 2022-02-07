@@ -1,6 +1,7 @@
 # Veertu's AWS EC2 AMI Prep Scripts
 
 All AMIs are built from the default AWS AMIs.
+
 > The macOS AMI is an EBS-backed, AWS-supported image. This AMI includes the AWS Command Line Interface, Command Line Tools for Xcode, Amazon SSM Agent, and Homebrew. The AWS Homebrew Tap includes the latest versions of multiple AWS packages included in the AMI.
 >
 > Root device type: ebs | Virtualization type: hvm | ENA Enabled: Yes
