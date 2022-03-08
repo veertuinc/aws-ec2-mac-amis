@@ -17,31 +17,32 @@ What we add, regardless of macOS version:
 The official Veertu AMIs in AWS have these steps already performed inside of them:
 
 1. `cd /Users/ec2-user && git clone https://github.com/veertuinc/aws-ec2-mac-amis.git && cd aws-ec2-mac-amis && ANKA_LICENSE="skip" ./$(sw_vers | grep ProductVersion | cut -d: -f2 | xargs)/prepare.bash; unset HISTFILE`
-2. Resizing of the disk may take a while. The instance may seem stuck, so be patient and only create the AMI once it's done (check `/var/log/resize-disk.log` to confirm)
-3. Set the ec2-user password with `sudo /usr/bin/dscl . -passwd /Users/ec2-user {NEWPASSWORDHERE}` (this will prevent passwordless setting for future executions)
-4. You now need to VNC in once (requirement for Anka to have necessary services): `open vnc://ec2-user:{GENERATEDPASSWORD}@{INSTANCEPUBLICIP}`
-5. Test `anka create` using generate getting-started scripts + delete VM it creates after starting and running command inside
-6. Ensure cloud connect service works with user-data
-7. Restart without user-data
-8. Remove license `sudo anka license remove`
-9. As user **AND** root:
+1. Resizing of the disk may take a while. The instance may seem stuck, so be patient and only create the AMI once it's done (check `/var/log/resize-disk.log` to confirm)
+1. You now need to VNC in once (requirement for Anka to have necessary services): `open vnc://ec2-user:{GENERATEDPASSWORD}@{INSTANCEPUBLICIP}`
+1. Test `anka create` using generate getting-started scripts + delete VM it creates after starting and running command inside
+1. Ensure cloud connect service works with user-data
+1. Restart without user-data
+1. As user **AND** root:
+    ```bash
+    anka registry delete --all;
+    anka delete --yes --all;
+    echo "" | tee /Library/Logs/Anka/anka.log; 
+    echo "" | tee /var/log/cloud-connect.log;
+    echo "" | tee /var/log/resize-disk.log; 
+    rm -f ~/.ssh/authorized_keys; 
+    rm -f ~/.*_history; 
+    history -p;
+    rm -rf /tmp/anka-mac-resources; 
+    rm -rf /Applications/Install*;
+    echo 123;
+    rm -rf ~/.zsh_*;
+    find "$(anka config img_lib_dir)" -mindepth 1 -delete;
+    find "$(anka config state_lib_dir)" -mindepth 1 -delete;
+    find "$(anka config vm_lib_dir)" -mindepth 1 -delete;
+    ```
+1. Remove license `sudo anka license remove`
+1. **DO NOT LEAVE THE TERMINAL ON VNC OPEN; QUIT THE APP**
 
-  ```bash
-  anka registry delete --all;
-  anka delete --yes --all;
-  echo "" | tee /Library/Logs/Anka/anka.log; 
-  echo "" | tee /var/log/cloud-connect.log;
-  echo "" | tee /var/log/resize-disk.log; 
-  rm -f ~/.ssh/authorized_keys; 
-  rm -f ~/.*_history; 
-  history -p;
-  rm -rf /tmp/anka-mac-resources; 
-  rm -rf /Applications/Install*;
-  rm -rf ~/.zsh_*;
-  find "$(anka config img_lib_dir)" -mindepth 1 -delete;
-  find "$(anka config state_lib_dir)" -mindepth 1 -delete;
-  find "$(anka config vm_lib_dir)" -mindepth 1 -delete;
-  ```
 
 This should install everything you need (the script is idempotent). You can then sanity check and then save the AMI.
 
