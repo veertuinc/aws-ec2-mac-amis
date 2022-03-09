@@ -16,6 +16,8 @@ What we add, regardless of macOS version:
 
 The official Veertu AMIs in AWS have these steps already performed inside of them:
 
+- **ALWAYS USE `unset HISTFILE;` at the end of commands**
+
 1. `cd /Users/ec2-user && git clone https://github.com/veertuinc/aws-ec2-mac-amis.git && cd aws-ec2-mac-amis && ANKA_LICENSE="skip" ./$(sw_vers | grep ProductVersion | cut -d: -f2 | xargs)/prepare.bash; unset HISTFILE`
 1. Resizing of the disk may take a while. The instance may seem stuck, so be patient and only create the AMI once it's done (check `/var/log/resize-disk.log` to confirm)
 1. You now need to VNC in once (requirement for Anka to have necessary services): `open vnc://ec2-user:{GENERATEDPASSWORD}@{INSTANCEPUBLICIP}`
@@ -34,15 +36,14 @@ The official Veertu AMIs in AWS have these steps already performed inside of the
     history -p;
     rm -rf /tmp/anka-mac-resources; 
     rm -rf /Applications/Install*;
-    echo 123;
     rm -rf ~/.zsh_*;
     find "$(anka config img_lib_dir)" -mindepth 1 -delete;
     find "$(anka config state_lib_dir)" -mindepth 1 -delete;
     find "$(anka config vm_lib_dir)" -mindepth 1 -delete;
+    unset HISTFILE;
     ```
 1. Remove license `sudo anka license remove`
 1. **DO NOT LEAVE THE TERMINAL ON VNC OPEN; QUIT THE APP**
-
 
 This should install everything you need (the script is idempotent). You can then sanity check and then save the AMI.
 

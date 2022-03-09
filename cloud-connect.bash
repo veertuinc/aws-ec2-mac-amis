@@ -76,7 +76,11 @@ else
     anka license show
     if ! anka --machine-readable license show | grep 'status": "valid"'; then
       echo "Activating anka license..."
-      anka license activate -f "${ANKA_LICENSE}" || true
+      ANKA_LICENSE_ACTIVATE_STDOUT="$(anka license activate -f "${ANKA_LICENSE}" || true)"
+      echo "${ANKA_LICENSE_ACTIVATE_STDOUT}"
+      # Post the fulfillment ID to the centralized logs
+      ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS="$(curl -s http://${ANKA_CONTROLLER_ADDRESS}/api/v1/status | jq -r '.body.registry_address')"
+      curl -v "http://${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/log" -d "{\"machine_name\": \"${INSTANCE_ID} | $(system_profiler SPHardwareDataType | grep 'Hardware UUID' | awk '{print $NF}')\", \"service\": \"License Activation Fulfillment IDs\", \"host\": \"\", \"content\": \"${ANKA_LICENSE_ACTIVATE_STDOUT}\"}"
     fi
     anka license show
   fi
