@@ -61,6 +61,7 @@ anka config block_nocache 0
 sudo anka config block_nocache 0
 
 # Disable sleep and screensaver so we don't need to disable "Require password after sleep or screensaver begins"
+if ! grep -q DisableScreenSaver /usr/local/aws/ec2-macos-init/init.toml; then
 sudo cat << EOF | sudo tee -a /usr/local/aws/ec2-macos-init/init.toml
 [[Module]]
     Name = "DisableScreenSaver"
@@ -70,6 +71,8 @@ sudo cat << EOF | sudo tee -a /usr/local/aws/ec2-macos-init/init.toml
     [Module.Command]
         Cmd = ["/bin/zsh", "-c", 'defaults write com.apple.screensaver idleTime 0']
 EOF
+fi
+if ! grep -q DisableSleep /usr/local/aws/ec2-macos-init/init.toml; then
 sudo cat << EOF | sudo tee -a /usr/local/aws/ec2-macos-init/init.toml
 [[Module]]
     Name = "DisableSleep"
@@ -79,3 +82,5 @@ sudo cat << EOF | sudo tee -a /usr/local/aws/ec2-macos-init/init.toml
     [Module.Command]
         Cmd = ["/bin/zsh", "-c", 'sudo systemsetup -setsleep Never']
 EOF
+fi
+unset HISTFILE

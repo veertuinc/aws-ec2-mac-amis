@@ -11,6 +11,7 @@ cd $SCRIPT_DIR
 [[ ! -e $CLOUD_CONNECT_PLIST_PATH ]] && sudo -E bash -c "../cloud-connect.bash"
 sudo chown -R $AWS_INSTANCE_USER:staff ~/aws-ec2-mac-amis
 # sudo anka config vmx_mitigations 0 # Apple has locked this and it can no longer be modified
-sudo /usr/bin/dscl . -passwd /Users/ec2-user "${AWS_INSTANCE_USER_PASSWD}"
+[[ -z "$(sudo sysadminctl -secureTokenStatus ec2-user 2>&1 | grep ENABLED)" ]] && sudo /usr/bin/dscl . -passwd /Users/ec2-user "${AWS_INSTANCE_USER_PASSWD}"
 echo ""
 echo "]] SUCCESS"
+unset HISTFILE
