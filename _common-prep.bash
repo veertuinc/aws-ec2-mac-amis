@@ -57,8 +57,8 @@ EOF
 launchctl unload -w /System/Library/LaunchAgents/com.apple.wifi.WiFiAgent.plist || true
 
 # Performance related changes
-anka config block_nocache 0
-sudo anka config block_nocache 0
+# anka config block_nocache 0
+# sudo anka config block_nocache 0
 
 # Disable sleep and screensaver so we don't need to disable "Require password after sleep or screensaver begins"
 if ! grep -q DisableScreenSaver /usr/local/aws/ec2-macos-init/init.toml; then
