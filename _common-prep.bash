@@ -56,7 +56,7 @@ EOF
 # syslog spam com.apple.xpc.launchd[1] (com.apple.wifi.WiFiAgent): Service only ran for 0 seconds. Pushing respawn out by 10 seconds.
 launchctl unload -w /System/Library/LaunchAgents/com.apple.wifi.WiFiAgent.plist || true
 
-# Performance related changes
+# Performance related changes / DISABLED AS OF 2.5.5 due to it freezing anka create
 # anka config block_nocache 0
 # sudo anka config block_nocache 0
 
