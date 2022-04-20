@@ -11,12 +11,14 @@ disjoin() {
   set -x
   rm -f /tmp/wait-fifo
   /usr/local/bin/ankacluster disjoin &
-  CERTS=""
-  [[ ! -z "$CLOUD_CONNECT_CERT" ]] && CERTS="--cert $CLOUD_CONNECT_CERT"
-  [[ ! -z "$CLOUD_CONNECT_KEY" ]] && CERTS="$CERTS --cert-key $CLOUD_CONNECT_KEY"
-  [[ ! -z "$CLOUD_CONNECT_CA" ]] && CERTS="$CERTS --cacert $CLOUD_CONNECT_CA"
-  NODE_ID="$(curl -s $CERTS "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" | jq -r ".body | .[] | select(.node_name==\"$(hostname)\") | .node_id")"
-  curl -s $CERTS -X DELETE "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" -H "Content-Type: application/json" -d "{\"node_id\": \"$NODE_ID\"}"
+  if [[ -n "${ANKA_CONTROLLER_ADDRESS}" ]]; then
+    CERTS=""
+    [[ ! -z "$CLOUD_CONNECT_CERT" ]] && CERTS="--cert $CLOUD_CONNECT_CERT"
+    [[ ! -z "$CLOUD_CONNECT_KEY" ]] && CERTS="$CERTS --cert-key $CLOUD_CONNECT_KEY"
+    [[ ! -z "$CLOUD_CONNECT_CA" ]] && CERTS="$CERTS --cacert $CLOUD_CONNECT_CA"
+    NODE_ID="$(curl -s $CERTS "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" | jq -r ".body | .[] | select(.node_name==\"$(hostname)\") | .node_id")"
+    curl -s $CERTS -X DELETE "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" -H "Content-Type: application/json" -d "{\"node_id\": \"$NODE_ID\"}"
+  fi
   wait $!
 }
 # Grab the ENVS the user sets in user-data
@@ -52,7 +54,11 @@ EOD
 else
   echo "$(date) ($(whoami)): Attempting join..."
   # Check if user-data exists
-  [[ ! -z "$(curl -s http://169.254.169.254/latest/user-data | grep 404)" || -z "$(curl -s http://169.254.169.254/latest/user-data)" ]] && echo "Could not find required ANKA_CONTROLLER_ADDRESS in instance user-data!" && exit 1
+  if [[ ! -z "$(curl -s http://169.254.169.254/latest/user-data | grep 404)" || -z "$(curl -s http://169.254.169.254/latest/user-data)" ]]; then
+    echo "Could not find required ANKA_CONTROLLER_ADDRESS in instance user-data!"
+    disjoin || true
+    exit 1
+  fi
   sudo sed -i '' "/anka.registry/d" /etc/hosts # Remove hosts modifications for automation (INTERNAL ONLY)
   # create user ENVs for this session
   eval "$(curl -s http://169.254.169.254/latest/user-data | grep "ANKA_")" # eval needed to handle quotes wrapping ARGS ENV
