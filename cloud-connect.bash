@@ -92,8 +92,6 @@ else
   [[ ! "${ANKA_JOIN_ARGS}" =~ "--reserve-space" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --reserve-space 20GB"
   ${ANKA_USE_PUBLIC_IP:-false} && INSTANCE_IP="${INSTANCE_PUBLIC_IP}" || INSTANCE_IP="${INSTANCE_PRIVATE_IP}"
   [[ ! "${ANKA_JOIN_ARGS}" =~ "--host" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --host ${INSTANCE_IP}"
-  # Anka agent install to handle it failing
-  curl ${ANKA_CONTROLLER_API_CERTS} -O "${ANKA_CONTROLLER_ADDRESS}/pkg/AnkaAgent.pkg" && installer -pkg AnkaAgent.pkg -tgt / && rm -f AnkaAgent.pkg
   anka license accept-eula 2>/dev/null || true
   if [[ -n "${ANKA_LICENSE}" ]]; then # Activate license if present
     anka license show
