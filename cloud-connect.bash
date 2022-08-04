@@ -88,7 +88,9 @@ else
   fi
   # Join arguments
   ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS:-"$*"}" # used for older getting started script + enables overriding defaults from inside plist instead of user-data
-  [[ ! "${ANKA_JOIN_ARGS}" =~ "--node-id" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --node-id ${INSTANCE_ID}"
+  if sudo ankacluster join --help | grep "node-id"; then # make sure we don't try to join with --node-id unless it's an available option for ankacluster
+    [[ ! "${ANKA_JOIN_ARGS}" =~ "--node-id" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --node-id ${INSTANCE_ID}"
+  fi
   [[ ! "${ANKA_JOIN_ARGS}" =~ "--reserve-space" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --reserve-space 20GB"
   ${ANKA_USE_PUBLIC_IP:-false} && INSTANCE_IP="${INSTANCE_PUBLIC_IP}" || INSTANCE_IP="${INSTANCE_PRIVATE_IP}"
   [[ ! "${ANKA_JOIN_ARGS}" =~ "--host" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --host ${INSTANCE_IP}"
