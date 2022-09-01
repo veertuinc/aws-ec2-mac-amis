@@ -29,7 +29,7 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.metadata.mds.pl
 sudo rm -rf /.Spotlight-V100/*
 
 # Enable VNC
-## Disabled as it now throws a warning: 
+## Disabled as it now throws a warning and doesn't work.
 ## Screen recording might be disabled. Screen Sharing or Remote Management must be enabled from System Preferences or via MDM.
 ## Screen control might be disabled. Screen Sharing or Remote Management must be enabled from System Preferences or via MDM.
 # pushd /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/
