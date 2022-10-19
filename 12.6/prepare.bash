@@ -14,4 +14,5 @@ sudo chown -R $AWS_INSTANCE_USER:staff ~/aws-ec2-mac-amis
 # [[ -z "$(sudo sysadminctl -secureTokenStatus ec2-user 2>&1 | grep ENABLED)" ]] && sudo /usr/bin/dscl . -passwd /Users/ec2-user "${AWS_INSTANCE_USER_PASSWD}" # We don't need this since VNC is now disabled by default
 echo ""
 echo "]] SUCCESS"
+echo "done" > ~/prep
 unset HISTFILE
