@@ -17,9 +17,9 @@ git pull
 ANKA_LICENSE=${ANKA_LICENSE:-""}
 if [[ -n "${ANKA_TARGET_VERSION}" ]]; then
   if [[ "$(arch)" == "arm64" ]]; then
-    export ANKA_VIRTUALIZATION_PACKAGE="${ANKA_TARGET_VERSION}-arm.pkg"
+    export ANKA_VIRTUALIZATION_PACKAGE="Anka-${ANKA_TARGET_VERSION}-arm.pkg"
   else
-    export ANKA_VIRTUALIZATION_PACKAGE="${ANKA_TARGET_VERSION}-intel.pkg"
+    export ANKA_VIRTUALIZATION_PACKAGE="Anka-${ANKA_TARGET_VERSION}-intel.pkg"
   fi
 fi
 [[ -z $(command -v anka) ]] && ./install-anka-virtualization-on-mac.bash
