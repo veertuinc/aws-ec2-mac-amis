@@ -36,6 +36,11 @@ cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
     </array>
     <key>RunAtLoad</key>
     <true/>
+    <key>KeepAlive</key>
+    <dict>
+      <key>SuccessfulExit</key>
+      <false/>
+    </dict>
     <key>WorkingDirectory</key>
     <string>/Users/$AWS_INSTANCE_USER</string>
     <key>StandardErrorPath</key>
