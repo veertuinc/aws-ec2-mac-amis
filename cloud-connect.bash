@@ -97,7 +97,8 @@ else
   if sudo ankacluster join --help | grep "node-id"; then # make sure we don't try to join with --node-id unless it's an available option for ankacluster
     [[ ! "${ANKA_JOIN_ARGS}" =~ "--node-id" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --node-id ${INSTANCE_ID}"
   fi
-  [[ ! "${ANKA_JOIN_ARGS}" =~ "--reserve-space" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --reserve-space 20GB"
+  # removed in 13.0.1/3.2.0 as not having enough space for the VMs to use can be a problem
+  # [[ ! "${ANKA_JOIN_ARGS}" =~ "--reserve-space" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --reserve-space $(df -H | grep /dev/ | head -1 | awk '{print $4}')B"
   ${ANKA_USE_PUBLIC_IP:-false} && INSTANCE_IP="${INSTANCE_PUBLIC_IP}" || INSTANCE_IP="${INSTANCE_PRIVATE_IP}"
   [[ ! "${ANKA_JOIN_ARGS}" =~ "--host" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --host ${INSTANCE_IP}"
   anka license accept-eula 2>/dev/null || true
