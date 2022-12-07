@@ -59,7 +59,7 @@ else
   if [[ ! -z "$(curl -s http://169.254.169.254/latest/user-data | grep 404)" || -z "$(curl -s http://169.254.169.254/latest/user-data)" ]]; then
     echo "Could not find any user-data for instance..."
     disjoin || true
-    exit 1
+    exit
   fi
   sudo sed -i '' "/anka.registry/d" /etc/hosts # Remove hosts modifications for automation (INTERNAL ONLY)
   # create user ENVs for this session
