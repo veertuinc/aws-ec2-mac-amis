@@ -70,7 +70,6 @@ else
   eval "$(curl -s http://169.254.169.254/latest/user-data | grep "ANKA_")" # eval needed to handle quotes wrapping ARGS ENV
   # pull latest scripts and restart script
   if [[ -n "${ANKA_PULL_LATEST_CLOUD_CONNECT}" ]]; then
-    echo test
     git fetch
     if [[ ! $(git rev-parse HEAD) == $(git rev-parse @{u}) ]]; then # Ensure we don't restart the script if there aren't any changes.
       git pull
