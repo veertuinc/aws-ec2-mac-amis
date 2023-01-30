@@ -4,19 +4,23 @@ set -exo pipefail
 export PATH="${PATH}:/opt/homebrew/bin:/opt/homebrew/sbin" # support new arm brew location
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $SCRIPT_DIR
+export CLOUD_CONNECT_JOINED_FILE="${HOME}/.cloud-connect-joined"
 echo "Waiting for networking..."
 while ! ping -c 1 -n github.com &> /dev/null; do sleep 1; done
 . ./_helpers.bash
 disjoin() {
   echo "$(date) $(whoami) Received a signal to shutdown"
   set -x
-  rm -f /tmp/wait-fifo
-  /usr/local/bin/ankacluster disjoin &
-  if [[ -n "${ANKA_CONTROLLER_ADDRESS}" ]]; then
-    NODE_ID="$(curl -s ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" | jq -r ".body | .[] | select(.node_name==\"$(hostname)\") | .node_id")"
-    curl -s ${ANKA_CONTROLLER_API_CERTS} -X DELETE "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" -H "Content-Type: application/json" -d "{\"node_id\": \"$NODE_ID\"}"
+  if [[ -f "${CLOUD_CONNECT_JOINED_FILE}" ]]; then # Only disjoin if cloud-connect joined us previously
+    rm -f /tmp/wait-fifo
+    /usr/local/bin/ankacluster disjoin &
+    rm -f "${CLOUD_CONNECT_JOINED_FILE}"
+    if [[ -n "${ANKA_CONTROLLER_ADDRESS}" ]]; then
+      NODE_ID="$(curl -s ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" | jq -r ".body | .[] | select(.node_name==\"$(hostname)\") | .node_id")"
+      curl -s ${ANKA_CONTROLLER_API_CERTS} -X DELETE "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" -H "Content-Type: application/json" -d "{\"node_id\": \"$NODE_ID\"}"
+    fi
+    wait $!
   fi
-  wait $!
 }
 # Grab the ENVS the user sets in user-data
 if [[ ! -e $CLOUD_CONNECT_PLIST_PATH ]]; then
@@ -58,7 +62,7 @@ else
   # Check if user-data exists
   if [[ ! -z "$(curl -s http://169.254.169.254/latest/user-data | grep 404)" || -z "$(curl -s http://169.254.169.254/latest/user-data)" ]]; then
     echo "Could not find any user-data for instance..."
-    # disjoin || true # removed so that on reboot it doesn't disjoin the users who manually joined
+    disjoin || true
     exit
   fi
   sudo sed -i '' "/anka.registry/d" /etc/hosts # Remove hosts modifications for automation (INTERNAL ONLY)
@@ -117,6 +121,7 @@ else
   /usr/local/bin/ankacluster disjoin || true
   sleep 10 # AWS instances, on first start, and even with functional networking (we ping github.com above), will have 169.254.169.254 assigned to the default interface and since joining happens very early in the startup process, that'll be what is assigned in the controller and cause problems.
   /usr/local/bin/ankacluster join ${ANKA_CONTROLLER_ADDRESS} ${ANKA_JOIN_ARGS}
+  touch "${CLOUD_CONNECT_JOINED_FILE}" # create file that indicates whether cloud-connect joined to the controller or not using userdata so that we don't disjoin manually joined users.
   trap disjoin 0 # Disjoin after we joined properly to avoid unloading prematurely
   set +x
   echo "Joined and now we'll stay alive and wait for a shutdown signal..."
