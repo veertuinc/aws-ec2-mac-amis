@@ -58,7 +58,7 @@ else
   # Check if user-data exists
   if [[ ! -z "$(curl -s http://169.254.169.254/latest/user-data | grep 404)" || -z "$(curl -s http://169.254.169.254/latest/user-data)" ]]; then
     echo "Could not find any user-data for instance..."
-    disjoin || true
+    # disjoin || true # removed so that on reboot it doesn't disjoin the users who manually joined
     exit
   fi
   sudo sed -i '' "/anka.registry/d" /etc/hosts # Remove hosts modifications for automation (INTERNAL ONLY)
