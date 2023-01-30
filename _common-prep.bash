@@ -26,13 +26,13 @@ fi
 popd
 
 # Disable indexing volumes
-sudo defaults write ~/.Spotlight-V100/VolumeConfiguration.plist Exclusions -array "/Volumes"
-sudo defaults write ~/.Spotlight-V100/VolumeConfiguration.plist Exclusions -array "/Network"
+sudo defaults write ~/.Spotlight-V100/VolumeConfiguration.plist Exclusions -array "/Volumes" || true
+sudo defaults write ~/.Spotlight-V100/VolumeConfiguration.plist Exclusions -array "/Network" || true
 sudo killall mds || true
 sleep 60
-sudo mdutil -a -i off /
-sudo mdutil -a -i off
-sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.metadata.mds.plist
+sudo mdutil -a -i off / || true
+sudo mdutil -a -i off || true
+sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.metadata.mds.plist || true
 sudo rm -rf /.Spotlight-V100/*
 
 # Enable VNC
