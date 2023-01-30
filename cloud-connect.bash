@@ -47,8 +47,6 @@ cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
       <key>SuccessfulExit</key>
       <false/>
     </dict>
-    <key>WorkingDirectory</key>
-    <string>/Users/$AWS_INSTANCE_USER</string>
     <key>StandardErrorPath</key>
     <string>/var/log/cloud-connect.log</string>
     <key>StandardOutPath</key>
