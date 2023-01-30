@@ -55,6 +55,8 @@ cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
     <string>/var/log/cloud-connect.log</string>
     <key>ExitTimeOut</key>
     <string>300</string>
+    <key>AssociatedBundleIdentifiers<key>
+    <string>com.veertu.anka</string>
   </dict>
   </plist>
 EOD
