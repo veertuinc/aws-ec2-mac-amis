@@ -65,9 +65,15 @@ else
     disjoin || true
     exit
   fi
-  sudo sed -i '' "/anka.registry/d" /etc/hosts # Remove hosts modifications for automation (INTERNAL ONLY)
+  sudo sed -i '' "/anka.registry/d" /etc/hosts # Remove hosts modifications for automation (INTERNAL ONLY)  
   # create user ENVs for this session
   eval "$(curl -s http://169.254.169.254/latest/user-data | grep "ANKA_")" # eval needed to handle quotes wrapping ARGS ENV
+  # pull latest scripts and restart script
+  if [[ -n "${ANKA_PULL_LATEST_CLOUD_CONNECT}" ]]; then
+    git pull
+    echo "restarting script now that changes have been made"
+    exit 1
+  fi
   INSTANCE_ID="$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
   INSTANCE_PRIVATE_IP="$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)"
   INSTANCE_PUBLIC_IP="$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)"
