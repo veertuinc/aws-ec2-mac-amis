@@ -26,37 +26,37 @@ disjoin() {
 if [[ ! -e $CLOUD_CONNECT_PLIST_PATH ]]; then
   mkdir -p $LAUNCH_LOCATION
 cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
-  <?xml version="1.0" encoding="UTF-8"?>
-  <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-  <plist version="1.0">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>aws-ec2-mac-amis.cloud-connect</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/env</string>
+    <string>/Users/$AWS_INSTANCE_USER/aws-ec2-mac-amis/cloud-connect.bash</string>
+    <string>${ANKA_JOIN_ARGS}</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/$AWS_INSTANCE_USER</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
   <dict>
-    <key>Label</key>
-    <string>aws-ec2-mac-amis.cloud-connect</string>
-    <key>ProgramArguments</key>
-    <array>
-      <string>/usr/bin/env</string>
-      <string>/Users/$AWS_INSTANCE_USER/aws-ec2-mac-amis/cloud-connect.bash</string>
-      <string>${ANKA_JOIN_ARGS}</string>
-    </array>
-    <key>WorkingDirectory</key>
-    <string>/Users/$AWS_INSTANCE_USER</string>
-    <key>RunAtLoad</key>
-    <true/>
-    <key>KeepAlive</key>
-    <dict>
-      <key>SuccessfulExit</key>
-      <false/>
-    </dict>
-    <key>StandardErrorPath</key>
-    <string>/var/log/cloud-connect.log</string>
-    <key>StandardOutPath</key>
-    <string>/var/log/cloud-connect.log</string>
-    <key>ExitTimeOut</key>
-    <string>300</string>
-    <key>AssociatedBundleIdentifiers<key>
-    <string>com.veertu.anka</string>
+    <key>SuccessfulExit</key>
+    <false/>
   </dict>
-  </plist>
+  <key>StandardErrorPath</key>
+  <string>/var/log/cloud-connect.log</string>
+  <key>StandardOutPath</key>
+  <string>/var/log/cloud-connect.log</string>
+  <key>ExitTimeOut</key>
+  <string>300</string>
+  <key>AssociatedBundleIdentifiers</key>
+  <string>com.veertu.anka</string>
+</dict>
+</plist>
 EOD
   launchctl load -w $CLOUD_CONNECT_PLIST_PATH
 else
