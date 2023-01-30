@@ -4,7 +4,7 @@ set -exo pipefail
 export PATH="${PATH}:/opt/homebrew/bin:/opt/homebrew/sbin" # support new arm brew location
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $SCRIPT_DIR
-export CLOUD_CONNECT_JOINED_FILE="~/.cloud-connect-joined"
+export CLOUD_CONNECT_JOINED_FILE=".cloud-connect-joined"
 echo "Waiting for networking..."
 while ! ping -c 1 -n github.com &> /dev/null; do sleep 1; done
 . ./_helpers.bash
@@ -38,6 +38,8 @@ cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
       <string>/Users/$AWS_INSTANCE_USER/aws-ec2-mac-amis/cloud-connect.bash</string>
       <string>${ANKA_JOIN_ARGS}</string>
     </array>
+    <key>WorkingDirectory</key>
+    <string>/Users/$AWS_INSTANCE_USER</string>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
