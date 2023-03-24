@@ -39,6 +39,8 @@ sudo rm -rf /.Spotlight-V100/*
 ## Disabled as it now throws a warning and doesn't work.
 ## Screen recording might be disabled. Screen Sharing or Remote Management must be enabled from System Preferences or via MDM.
 ## Screen control might be disabled. Screen Sharing or Remote Management must be enabled from System Preferences or via MDM.
+# sudo defaults write /var/db/launchd.db/com.apple.launchd/overrides.plist com.apple.screensharing -dict Disabled -bool false
+# sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.screensharing.plist
 # pushd /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/
 # sudo ./kickstart -configure -allowAccessFor -specifiedUsers
 # sudo ./kickstart -configure -allowAccessFor -allUsers -privs -all
