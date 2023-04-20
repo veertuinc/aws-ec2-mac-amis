@@ -5,6 +5,7 @@ export PATH="${PATH}:/opt/homebrew/bin:/opt/homebrew/sbin" # support new arm bre
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $SCRIPT_DIR
 export CLOUD_CONNECT_JOINED_FILE=".cloud-connect-joined"
+[[ "$(du -sk /var/log/cloud-connect.log | awk '{print $1/1024}' | cut -d. -f1)" -gt 100 ]] && echo "" > /var/log/cloud-connect.log # empty log file so that it doesn't grow uncontrollably.
 echo "Waiting for networking..."
 while ! ping -c 1 -n github.com &> /dev/null; do sleep 1; done
 . ./_helpers.bash
@@ -60,7 +61,6 @@ cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
 EOD
   launchctl load -w $CLOUD_CONNECT_PLIST_PATH
 else
-  [[ "$(du -sk /var/log/cloud-connect.log | awk '{print $1/1024}' | cut -d. -f1)" -gt 100 ]] && echo "" > /var/log/cloud-connect.log # empty log file so that it doesn't grow uncontrollably.
   echo "$(date) ($(whoami)): Attempting join..."
   # Check if user-data exists
   if [[ ! -z "$(curl -s http://169.254.169.254/latest/user-data | grep 404)" || -z "$(curl -s http://169.254.169.254/latest/user-data)" ]]; then
