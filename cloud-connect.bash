@@ -63,7 +63,7 @@ EOD
 else
   echo "$(date) ($(whoami)): Attempting join..."
   # Check if user-data exists
-  if [[ ! -z "$(curl -s http://169.254.169.254/latest/user-data | grep 404)" || -z "$(curl -s http://169.254.169.254/latest/user-data)" ]]; then
+  if [[ -n "$(curl -s http://169.254.169.254/latest/user-data | grep 404)" || -z "$(curl -s http://169.254.169.254/latest/user-data | grep "ANKA_")" ]]; then
     echo "Could not find any user-data for instance..."
     disjoin || true
     exit
