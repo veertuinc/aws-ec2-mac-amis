@@ -92,7 +92,7 @@ else
   if [[ -z "${ANKA_CONTROLLER_API_CERTS}" && -n "${ANKA_CONTROLLER_API_CERT}" ]]; then
     ANKA_CONTROLLER_API_CERTS="--cert ${ANKA_CONTROLLER_API_CERT}"
     if [[ -n "${ANKA_CONTROLLER_API_KEY}" ]]; then
-      ANKA_CONTROLLER_API_CERTS="${ANKA_CONTROLLER_API_CERTS} --cert-key ${ANKA_CONTROLLER_API_KEY}"
+      ANKA_CONTROLLER_API_CERTS="${ANKA_CONTROLLER_API_CERTS} --key ${ANKA_CONTROLLER_API_KEY}"
     else
       echo "missing controller cert key" && exit 2
     fi
@@ -102,7 +102,7 @@ else
   if [[ -z "${ANKA_REGISTRY_API_CERTS}" && -n "${ANKA_REGISTRY_API_CERT}" ]]; then
     ANKA_REGISTRY_API_CERTS="--cert ${ANKA_REGISTRY_API_CERT}"
     if [[ -n "${ANKA_REGISTRY_API_KEY}" ]]; then
-      ANKA_REGISTRY_API_CERTS="${ANKA_REGISTRY_API_CERTS} --cert-key ${ANKA_REGISTRY_API_KEY}"
+      ANKA_REGISTRY_API_CERTS="${ANKA_REGISTRY_API_CERTS} --key ${ANKA_REGISTRY_API_KEY}"
     else
       echo "missing registry cert key" && exit 2
     fi
