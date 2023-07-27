@@ -60,7 +60,7 @@ cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
 </plist>
 EOD
   launchctl load -w $CLOUD_CONNECT_PLIST_PATH
-else
+else # ==================================================================
   echo "$(date) ($(whoami)): Attempting join..."
   # Check if user-data exists
   if [[ -n "$(curl -s http://169.254.169.254/latest/user-data | grep 404)" || -z "$(curl -s http://169.254.169.254/latest/user-data | grep "ANKA_")" ]]; then
@@ -80,6 +80,11 @@ else
       echo "restarting script now that changes have been made"
       exit 1
     fi
+  fi
+  if ${ANKA_UPGRADE_CLI_TO_LATEST:-false}; then
+    FULL_FILE_NAME="$(curl -Ls -r 0-1 -o /dev/null -w %{url_effective} https://veertu.com/downloads/anka-virtualization-latest | cut -d/ -f5)"
+    curl -S -L -o ./$FULL_FILE_NAME https://veertu.com/downloads/anka-virtualization-latest
+    sudo installer -pkg $FULL_FILE_NAME -tgt /
   fi
   INSTANCE_ID="$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
   INSTANCE_PRIVATE_IP="$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)"
@@ -114,6 +119,9 @@ else
   if sudo ankacluster join --help | grep "node-id"; then # make sure we don't try to join with --node-id unless it's an available option for ankacluster
     [[ ! "${ANKA_JOIN_ARGS}" =~ "--node-id" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --node-id ${INSTANCE_ID}"
   fi
+  # Get registry URL
+  ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS="$(curl -s ${ANKA_CONTROLLER_API_CERTS} ${ANKA_CONTROLLER_ADDRESS}/api/v1/status | jq -r '.body.registry_address')"
+  HARDWARE_TYPE="$(system_profiler SPHardwareDataType | grep 'Hardware UUID' | awk '{print $NF}')"
   # removed in 13.0.1/3.2.0 as not having enough space for the VMs to use can be a problem
   # [[ ! "${ANKA_JOIN_ARGS}" =~ "--reserve-space" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --reserve-space $(df -H | grep /dev/ | head -1 | awk '{print $4}')B"
   ${ANKA_USE_PUBLIC_IP:-false} && INSTANCE_IP="${INSTANCE_PUBLIC_IP}" || INSTANCE_IP="${INSTANCE_PRIVATE_IP}"
@@ -126,12 +134,19 @@ else
       ANKA_LICENSE_ACTIVATE_STDOUT="$(anka license activate -f "${ANKA_LICENSE}" || true)"
       echo "${ANKA_LICENSE_ACTIVATE_STDOUT}"
       # Post the fulfillment ID to the centralized logs
-      ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS="$(curl -s ${ANKA_CONTROLLER_API_CERTS} ${ANKA_CONTROLLER_ADDRESS}/api/v1/status | jq -r '.body.registry_address')"
-      curl ${ANKA_REGISTRY_API_CERTS} -v "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/log" -d "{\"machine_name\": \"${INSTANCE_ID} | $(system_profiler SPHardwareDataType | grep 'Hardware UUID' | awk '{print $NF}')\", \"service\": \"AWS Cloud Connect Service\", \"host\": \"\", \"content\": \"${ANKA_LICENSE_ACTIVATE_STDOUT}\"}"
+      curl ${ANKA_REGISTRY_API_CERTS} -v "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/log" -d "{\"machine_name\": \"${INSTANCE_ID} | ${HARDWARE_TYPE}\", \"service\": \"AWS Cloud Connect Service\", \"host\": \"\", \"content\": \"${ANKA_LICENSE_ACTIVATE_STDOUT}\"}"
     fi
     anka license show
   fi
   /usr/local/bin/ankacluster disjoin || true
+  if [[ -n "${ANKA_PULL_TEMPLATES_REGEX}" ]]; then
+    TEMPLATES_TO_PULL=()
+    TEMPLATES_TO_PULL+="$(curl ${ANKA_REGISTRY_API_CERTS} -v "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/vm" | jq -r '.body[] | keys[]' | grep -E "${ANKA_PULL_TEMPLATES_REGEX}")"
+    TEMPLATES_TO_PULL+="$(curl ${ANKA_REGISTRY_API_CERTS} -v "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/vm" | jq -r '.body[] | values[]' | grep -E "${ANKA_PULL_TEMPLATES_REGEX}")"
+    for TEMPLATE in "${TEMPLATES_TO_PULL[@]}"; do
+      anka --debug registry -r "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}" pull "${TEMPLATE}"
+    done
+  fi
   sleep 10 # AWS instances, on first start, and even with functional networking (we ping github.com above), will have 169.254.169.254 assigned to the default interface and since joining happens very early in the startup process, that'll be what is assigned in the controller and cause problems.
   /usr/local/bin/ankacluster join ${ANKA_CONTROLLER_ADDRESS} ${ANKA_JOIN_ARGS}
   touch "${CLOUD_CONNECT_JOINED_FILE}" # create file that indicates whether cloud-connect joined to the controller or not using userdata so that we don't disjoin manually joined users.

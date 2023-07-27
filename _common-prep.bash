@@ -6,23 +6,16 @@ source ~/.zshrc || true
 # Ensure the query tool exists ; AWS has deprecated it
 # [[ ! -e "/usr/local/bin/ec2-metadata" ]] && curl http://s3.amazonaws.com/ec2metadata/ec2-metadata -o /usr/local/bin/ec2-metadata && chmod +x /usr/local/bin/ec2-metadata
 # Install Anka
-if [[ ! -d "$HOME/getting-started" ]]; then
-  pushd $HOME
-    git clone https://github.com/veertuinc/getting-started.git $GETTING_STARTED_CLONE_BRANCH
-  popd
-fi
 brew install jq # used for cloud-connect api parsing
-pushd $GETTING_STARTED_LOCATION
-git pull
-ANKA_LICENSE=${ANKA_LICENSE:-""}
-if [[ -n "${ANKA_TARGET_VERSION}" ]]; then
-  if [[ "$(arch)" == "arm64" ]]; then
-    export ANKA_VIRTUALIZATION_PACKAGE="Anka-${ANKA_TARGET_VERSION}.pkg"
-  else
-    export ANKA_VIRTUALIZATION_PACKAGE="Anka-${ANKA_TARGET_VERSION}.pkg"
-  fi
-fi
-[[ -z $(command -v anka) ]] && ./install-anka-virtualization-on-mac.bash
+pushd "${HOME}"
+  rm -rf getting-started
+  git clone --no-checkout --depth=1 --filter=blob:none https://github.com/veertuinc/getting-started.git
+  cd getting-started
+  git reset -q -- shared.bash install-anka-virtualization-on-mac.bash # Only download the shared.bash and AWS folder
+  git checkout-index -a
+  ANKA_LICENSE=${ANKA_LICENSE:-""}
+  [[ -n "${ANKA_TARGET_VERSION}" ]] && export ANKA_VIRTUALIZATION_PACKAGE="Anka-${ANKA_TARGET_VERSION}.pkg"
+  ./install-anka-virtualization-on-mac.bash
 popd
 
 # Disable indexing volumes
