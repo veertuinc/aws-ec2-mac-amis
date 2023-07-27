@@ -141,8 +141,9 @@ else # ==================================================================
   /usr/local/bin/ankacluster disjoin || true
   if [[ -n "${ANKA_PULL_TEMPLATES_REGEX}" ]]; then
     TEMPLATES_TO_PULL=()
-    TEMPLATES_TO_PULL+="$(curl ${ANKA_REGISTRY_API_CERTS} -v "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/vm" | jq -r '.body[] | keys[]' | grep -E "${ANKA_PULL_TEMPLATES_REGEX}")"
-    TEMPLATES_TO_PULL+="$(curl ${ANKA_REGISTRY_API_CERTS} -v "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/vm" | jq -r '.body[] | values[]' | grep -E "${ANKA_PULL_TEMPLATES_REGEX}")"
+    TEMPLATES_TO_PULL+=($(curl -s ${ANKA_REGISTRY_API_CERTS} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/vm" | jq -r '.body[] | keys[]' | grep -E "${ANKA_PULL_TEMPLATES_REGEX}" || true))
+    TEMPLATES_TO_PULL+=($(curl -s ${ANKA_REGISTRY_API_CERTS} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/vm" | jq -r '.body[] | values[]' | grep -E "${ANKA_PULL_TEMPLATES_REGEX}" || true))
+    echo "${TEMPLATES_TO_PULL[@]}"
     for TEMPLATE in "${TEMPLATES_TO_PULL[@]}"; do
       anka --debug registry -r "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}" pull "${TEMPLATE}"
     done

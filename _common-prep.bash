@@ -9,10 +9,8 @@ source ~/.zshrc || true
 brew install jq # used for cloud-connect api parsing
 pushd "${HOME}"
   rm -rf getting-started
-  git clone --no-checkout --depth=1 --filter=blob:none https://github.com/veertuinc/getting-started.git
+  git clone https://github.com/veertuinc/getting-started.git
   cd getting-started
-  git reset -q -- shared.bash install-anka-virtualization-on-mac.bash # Only download the shared.bash and AWS folder
-  git checkout-index -a
   ANKA_LICENSE=${ANKA_LICENSE:-""}
   [[ -n "${ANKA_TARGET_VERSION}" ]] && export ANKA_VIRTUALIZATION_PACKAGE="Anka-${ANKA_TARGET_VERSION}.pkg"
   ./install-anka-virtualization-on-mac.bash
