@@ -139,17 +139,26 @@ else # ==================================================================
     anka license show
   fi
   /usr/local/bin/ankacluster disjoin || true
+  sleep 10 # AWS instances, on first start, and even with functional networking (we ping github.com above), will have 169.254.169.254 assigned to the default interface and since joining happens very early in the startup process, that'll be what is assigned in the controller and cause problems.
+  /usr/local/bin/ankacluster join ${ANKA_CONTROLLER_ADDRESS} ${ANKA_JOIN_ARGS}
+  sleep 5
+  # Get Node Name
+  JOINED_NODE_NAME="$(/usr/local/bin/ankacluster status | grep node_name | awk '{ print $2 }' | xargs)"
+  # Get Node ID using Node Name
+  JOINED_NODE_ID=$(curl -s ${ANKA_REGISTRY_API_CERTS} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/api/v1/node" | jq -r ".body[] | select(.node_name==\"${JOINED_NODE_NAME}}\") | .node_id")
   if [[ -n "${ANKA_PULL_TEMPLATES_REGEX}" ]]; then
     TEMPLATES_TO_PULL=()
     TEMPLATES_TO_PULL+=($(curl -s ${ANKA_REGISTRY_API_CERTS} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/vm" | jq -r '.body[] | keys[]' | grep -E "${ANKA_PULL_TEMPLATES_REGEX}" || true))
     TEMPLATES_TO_PULL+=($(curl -s ${ANKA_REGISTRY_API_CERTS} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/vm" | jq -r '.body[] | values[]' | grep -E "${ANKA_PULL_TEMPLATES_REGEX}" || true))
     echo "${TEMPLATES_TO_PULL[@]}"
+    # Put in drain mode
+    curl -X POST ${ANKA_REGISTRY_API_CERTS} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/api/v1/node/config" -d "{\"node_id\": \"${JOINED_NODE_ID}\", \"drain_mode\": true}"
     for TEMPLATE in "${TEMPLATES_TO_PULL[@]}"; do
       anka --debug registry -r "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}" pull "${TEMPLATE}"
     done
+    # Remove drain mode
+    curl -X POST ${ANKA_REGISTRY_API_CERTS} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/api/v1/node/config" -d "{\"node_id\": \"${JOINED_NODE_ID}\", \"drain_mode\": false}"
   fi
-  sleep 10 # AWS instances, on first start, and even with functional networking (we ping github.com above), will have 169.254.169.254 assigned to the default interface and since joining happens very early in the startup process, that'll be what is assigned in the controller and cause problems.
-  /usr/local/bin/ankacluster join ${ANKA_CONTROLLER_ADDRESS} ${ANKA_JOIN_ARGS}
   # Do a quick check to see if there was a problem post-start
   sleep 3
   ankacluster status
