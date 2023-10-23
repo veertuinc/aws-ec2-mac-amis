@@ -17,6 +17,11 @@ source ~/.zshrc || true
 # Install resize disk plist
 [[ ! -e $RESIZE_DISK_PLIST_PATH ]] && sudo -E bash -c "pwd; ../resize-disk.bash"
 
+# Prewarm instance
+brew install fio
+sudo fio --filename=/dev/r$(df -h / | grep -o 'disk[0-9]') --rw=read --bs=1M --iodepth=32 --ioengine=posixaio --direct=1 --name=volume-initialize
+brew uninstall fio
+
 # Install Anka
 brew install jq # used for cloud-connect api parsing
 pushd "${HOME}"
@@ -101,11 +106,6 @@ sudo cat << EOF | sudo tee -a /usr/local/aws/ec2-macos-init/init.toml
 EOF
 fi
 unset HISTFILE
-
-# Prewarm instance
-brew install fio
-sudo fio --filename=/dev/r$(df -h / | grep -o 'disk[0-9]') --rw=read --bs=1M --iodepth=32 --ioengine=posixaio --direct=1 --name=volume-initialize
-brew uninstall fio
 
 # Create plist for cloud connect # Should be last!
 [[ ! -e $CLOUD_CONNECT_PLIST_PATH ]] && sudo -E bash -c "../cloud-connect.bash"
