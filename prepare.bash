@@ -15,7 +15,7 @@ source ~/.zshrc || true
 [[ -f "./${AMI_MACOS_TARGET_VERSION}.bash" ]] && ./"${AMI_MACOS_TARGET_VERSION}".bash
 
 # Install resize disk plist
-[[ ! -e $RESIZE_DISK_PLIST_PATH ]] && sudo -E bash -c "pwd; ../resize-disk.bash"
+[[ ! -e $RESIZE_DISK_PLIST_PATH ]] && sudo -E bash -c "pwd; ./resize-disk.bash"
 
 # Prewarm instance
 brew install fio
@@ -108,7 +108,7 @@ fi
 unset HISTFILE
 
 # Create plist for cloud connect # Should be last!
-[[ ! -e $CLOUD_CONNECT_PLIST_PATH ]] && sudo -E bash -c "../cloud-connect.bash"
+/cloud-connect.bash"
 
 sudo chown -R $AWS_INSTANCE_USER:staff ~/aws-ec2-mac-amis
 
