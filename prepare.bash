@@ -108,7 +108,7 @@ fi
 unset HISTFILE
 
 # Create plist for cloud connect # Should be last!
-/cloud-connect.bash"
+[[ ! -e $CLOUD_CONNECT_PLIST_PATH ]] && sudo -E bash -c "./cloud-connect.bash"
 
 sudo chown -R $AWS_INSTANCE_USER:staff ~/aws-ec2-mac-amis
 
