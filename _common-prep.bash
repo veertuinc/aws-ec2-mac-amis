@@ -89,3 +89,8 @@ sudo cat << EOF | sudo tee -a /usr/local/aws/ec2-macos-init/init.toml
 EOF
 fi
 unset HISTFILE
+
+# Prewarm instance
+brew install fio
+sudo fio --filename=/dev/r$(df -h / | grep -o 'disk[0-9]') --rw=read --bs=1M --iodepth=32 --ioengine=posixaio --direct=1 --name=volume-initialize
+brew uninstall fio
