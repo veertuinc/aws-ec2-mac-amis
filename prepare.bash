@@ -15,12 +15,7 @@ source ~/.zshrc || true
 [[ -f "./${AMI_MACOS_TARGET_VERSION}.bash" ]] && ./"${AMI_MACOS_TARGET_VERSION}".bash
 
 # Install resize disk plist
-[[ ! -e $RESIZE_DISK_PLIST_PATH ]] && sudo -E bash -c "pwd; ./resize-disk.bash"
-
-# Prewarm instance
-brew install fio
-sudo fio --filename=/dev/r$(df -h / | grep -o 'disk[0-9]') --rw=read --bs=1M --iodepth=32 --ioengine=posixaio --direct=1 --name=volume-initialize
-brew uninstall fio
+[[ ! -e "${RESIZE_DISK_PLIST_PATH}" ]] && sudo -E bash -c "pwd; ./resize-disk.bash"
 
 # Install Anka
 brew install jq # used for cloud-connect api parsing
