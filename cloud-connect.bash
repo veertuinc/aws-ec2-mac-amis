@@ -2,6 +2,7 @@
 set -exo pipefail
 [[ ! $EUID -eq 0 ]] && echo "RUN AS ROOT!" && exit 1
 export PATH="${PATH}:/opt/homebrew/bin:/opt/homebrew/sbin" # support new arm brew location
+export HOME="/Users/ec2-user/" # git config --global --add safe.directory /Users/ec2-user/aws-ec2-mac-amis fatal: $HOME not set
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $SCRIPT_DIR
 export CLOUD_CONNECT_JOINED_FILE=".cloud-connect-joined"
