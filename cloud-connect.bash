@@ -146,7 +146,7 @@ else # ==================================================================
       echo "resize-disk logs"; tail -5 /var/log/resize-disk.log || true
       sleep 5
     done
-    ./pre-warm-root-vol.bash
+    sudo ./pre-warm-root-vol.bash
   fi
   #
   /usr/local/bin/ankacluster disjoin || true

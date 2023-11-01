@@ -4,6 +4,10 @@ set -exo pipefail
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $SCRIPT_DIR
 . ./_helpers.bash
+fin() {
+  echo "finished" > /tmp/resize-disk.status
+}
+trap fin EXIT
 echo "running" > /tmp/resize-disk.status
 if [[ ! -e "${RESIZE_DISK_PLIST_PATH}" ]]; then
 cat > "${RESIZE_DISK_PLIST_PATH}" <<EOD
@@ -39,4 +43,3 @@ else
   echo "y" | diskutil repairDisk $PDISK
   diskutil apfs resizeContainer $APFSCONT 0
 fi
-echo "finished" > /tmp/resize-disk.status
