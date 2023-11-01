@@ -139,16 +139,6 @@ else # ==================================================================
     fi
     anka license show
   fi
-  # Prewarming
-  if [[ -n "${ANKA_PRE_WARM_ROOT_VOL}" ]]; then
-    while [[ ! -f /tmp/resize-disk.status ]] || grep -q "running" /tmp/resize-disk.status; do
-      echo "waiting for resize-disk to finish running before we pre-warm..."
-      echo "resize-disk logs"; tail -5 /var/log/resize-disk.log || true
-      sleep 5
-    done
-    sudo ./pre-warm-root-vol.bash
-  fi
-  #
   /usr/local/bin/ankacluster disjoin || true
   if [[ -n "${ANKA_PULL_TEMPLATES_REGEX}" ]]; then
     TEMPLATES_TO_PULL=()
