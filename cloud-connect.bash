@@ -62,16 +62,20 @@ cat > $CLOUD_CONNECT_PLIST_PATH <<EOD
 EOD
   launchctl load -w $CLOUD_CONNECT_PLIST_PATH
 else # ==================================================================
+  
+  # https://aws.amazon.com/blogs/aws/amazon-ec2-instance-metadata-service-imdsv2-by-default/
+  IMDS_TOKEN="$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")"
+  [[ -n "${IMDS_TOKEN}" ]] || (echo "error: no IMDS token obtained from http://169.254.169.254/latest/api/token" && exit 1) 
   echo "$(date) ($(whoami)): Attempting join..."
   # Check if user-data exists
-  if [[ -n "$(curl -s http://169.254.169.254/latest/user-data | grep 404)" || -z "$(curl -s http://169.254.169.254/latest/user-data | grep "ANKA_")" ]]; then
+  if [[ -n "$(curl -s http://169.254.169.254/latest/user-data -H "X-aws-ec2-metadata-token: ${IMDS_TOKEN}" | grep 404)" || -z "$(curl -s http://169.254.169.254/latest/user-data -H "X-aws-ec2-metadata-token: ${IMDS_TOKEN}" | grep "ANKA_")" ]]; then
     echo "Could not find any user-data for instance..."
     disjoin || true
     exit
   fi
   sudo sed -i '' "/anka.registry/d" /etc/hosts # Remove hosts modifications for automation (INTERNAL ONLY)  
   # create user ENVs for this session
-  eval "$(curl -s http://169.254.169.254/latest/user-data | grep "ANKA_")" # eval needed to handle quotes wrapping ARGS ENV
+  eval "$(curl -s http://169.254.169.254/latest/user-data -H "X-aws-ec2-metadata-token: ${IMDS_TOKEN}" | grep "ANKA_")" # eval needed to handle quotes wrapping ARGS ENV
   # pull latest scripts and restart script
   if [[ -n "${ANKA_PULL_LATEST_CLOUD_CONNECT}" ]]; then
     git config --global --add safe.directory /Users/ec2-user/aws-ec2-mac-amis
@@ -87,9 +91,9 @@ else # ==================================================================
     curl -S -L -o ./$FULL_FILE_NAME https://veertu.com/downloads/anka-virtualization-latest
     sudo installer -pkg $FULL_FILE_NAME -tgt /
   fi
-  INSTANCE_ID="$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
-  INSTANCE_PRIVATE_IP="$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)"
-  INSTANCE_PUBLIC_IP="$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)"
+  INSTANCE_ID="$(curl -s http://169.254.169.254/latest/meta-data/instance-id -H "X-aws-ec2-metadata-token: ${IMDS_TOKEN}")"
+  INSTANCE_PRIVATE_IP="$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4 -H "X-aws-ec2-metadata-token: ${IMDS_TOKEN}")"
+  INSTANCE_PUBLIC_IP="$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 -H "X-aws-ec2-metadata-token: ${IMDS_TOKEN}")"
   # IF the user wants to change the IP address for the registry domain name (if they want to use a second EC2 registry for better speed), handle setting the /etc/hosts
   if [[ -n "${ANKA_REGISTRY_OVERRIDE_IP}" && -n "${ANKA_REGISTRY_OVERRIDE_DOMAIN}" ]]; then
     modify_hosts $ANKA_REGISTRY_OVERRIDE_DOMAIN $ANKA_REGISTRY_OVERRIDE_IP
