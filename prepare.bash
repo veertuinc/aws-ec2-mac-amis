@@ -1,10 +1,22 @@
+#!/bin/bash
+set -exo pipefail
 unset HISTFILE
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd $SCRIPT_DIR
+. ./_helpers.bash
+
 GETTING_STARTED_LOCATION="$HOME/getting-started"
 # POPULATE .zshrc
 [[ -z "$(grep "alias ll" $HOME/.zshrc)" ]] && echo "" >> $HOME/.zshrc && echo "alias ll=\"ls -laht\"" >> $HOME/.zshrc
 source ~/.zshrc || true
 # Ensure the query tool exists ; AWS has deprecated it
 # [[ ! -e "/usr/local/bin/ec2-metadata" ]] && curl http://s3.amazonaws.com/ec2metadata/ec2-metadata -o /usr/local/bin/ec2-metadata && chmod +x /usr/local/bin/ec2-metadata
+
+[[ -f "./${AMI_MACOS_TARGET_VERSION}.bash" ]] && ./"${AMI_MACOS_TARGET_VERSION}".bash
+
+# Install resize disk plist
+[[ ! -e "${RESIZE_DISK_PLIST_PATH}" ]] && sudo -E bash -c "pwd; ./resize-disk.bash"
+
 # Install Anka
 brew install jq # used for cloud-connect api parsing
 pushd "${HOME}"
@@ -88,4 +100,12 @@ sudo cat << EOF | sudo tee -a /usr/local/aws/ec2-macos-init/init.toml
         Cmd = ["/bin/zsh", "-c", 'sudo systemsetup -setsleep Never']
 EOF
 fi
+unset HISTFILE
+
+# Create plist for cloud connect # Should be last!
+[[ ! -e $CLOUD_CONNECT_PLIST_PATH ]] && sudo -E bash -c "./cloud-connect.bash"
+
+sudo chown -R $AWS_INSTANCE_USER:staff ~/aws-ec2-mac-amis
+
+echo "done" > ~/prep
 unset HISTFILE
