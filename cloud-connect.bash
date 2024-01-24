@@ -153,7 +153,7 @@ else # ==================================================================
       anka --debug registry -r "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}" pull "${TEMPLATE}"
     done
   fi
-  ${ANKA_DRAIN_ON_JOIN:-false} && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --drain-mode"
+  ${ANKA_DRAINED_ON_JOIN:-false} && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --drain-mode"
   sleep 10 # AWS instances, on first start, and even with functional networking (we ping github.com above), will have 169.254.169.254 assigned to the default interface and since joining happens very early in the startup process, that'll be what is assigned in the controller and cause problems.
   /usr/local/bin/ankacluster join ${ANKA_CONTROLLER_ADDRESS} ${ANKA_JOIN_ARGS}
   # Do a quick check to see if there was a problem post-start
