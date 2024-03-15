@@ -1,5 +1,7 @@
 #!/bin/bash
 set -exo pipefail
+echo ""
+echo "]] ANKA CLOUD CONNECT SCRIPT STARTED"
 [[ ! $EUID -eq 0 ]] && echo "RUN AS ROOT!" && exit 1
 export PATH="${PATH}:/opt/homebrew/bin:/opt/homebrew/sbin" # support new arm brew location
 export HOME="/Users/ec2-user/" # git config --global --add safe.directory /Users/ec2-user/aws-ec2-mac-amis fatal: $HOME not set
@@ -75,7 +77,7 @@ else # ==================================================================
   fi
   sudo sed -i '' "/anka.registry/d" /etc/hosts # Remove hosts modifications for automation (INTERNAL ONLY)  
   # create user ENVs for this session
-  eval "$(curl -s http://169.254.169.254/latest/user-data -H "X-aws-ec2-metadata-token: ${IMDS_TOKEN}" | grep "ANKA_")" # eval needed to handle quotes wrapping ARGS ENV
+  eval "$(curl -s http://169.254.169.254/latest/user-data -H "X-aws-ec2-metadata-token: ${IMDS_TOKEN}" | grep "ANKA_" | grep -v "^#")" # eval needed to handle quotes wrapping ARGS ENV
   # pull latest scripts and restart script
   if [[ -n "${ANKA_PULL_LATEST_CLOUD_CONNECT}" ]]; then
     git config --global --add safe.directory /Users/ec2-user/aws-ec2-mac-amis
@@ -88,8 +90,10 @@ else # ==================================================================
   fi
   if ${ANKA_UPGRADE_CLI_TO_LATEST:-false}; then
     FULL_FILE_NAME="$(curl -Ls -r 0-1 -o /dev/null -w %{url_effective} https://veertu.com/downloads/anka-virtualization-latest | cut -d/ -f5)"
-    curl -S -L -o ./$FULL_FILE_NAME https://veertu.com/downloads/anka-virtualization-latest
-    sudo installer -pkg $FULL_FILE_NAME -tgt /
+    if [[ ! -e ./$FULL_FILE_NAME ]]; then 
+      curl -S -L -o ./$FULL_FILE_NAME https://veertu.com/downloads/anka-virtualization-latest
+      sudo installer -pkg $FULL_FILE_NAME -tgt /
+    fi
   fi
   INSTANCE_ID="$(curl -s http://169.254.169.254/latest/meta-data/instance-id -H "X-aws-ec2-metadata-token: ${IMDS_TOKEN}")"
   INSTANCE_PRIVATE_IP="$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4 -H "X-aws-ec2-metadata-token: ${IMDS_TOKEN}")"
