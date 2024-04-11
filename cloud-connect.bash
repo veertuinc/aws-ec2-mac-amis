@@ -159,10 +159,12 @@ else # ==================================================================
   fi
   if ${ANKA_DRAINED_ON_JOIN:-false}; then
     # Upgrade agent to minimum required version for drain mode
-    if [[ "$(arch)" == "arm64" ]]; then
-      curl -O https://downloads.veertu.com/anka/AnkaAgentArm-1.32.0-c375584c.pkg && sudo installer -pkg AnkaAgentArm-1.32.0-c375584c.pkg -tgt / && sudo rm -f AnkaAgentArm-1.32.0-c375584c.pkg
-    else
-      curl -O https://downloads.veertu.com/anka/AnkaAgent-1.32.0-c375584c.pkg && sudo installer -pkg AnkaAgent-1.32.0-c375584c.pkg -tgt / && sudo rm -f AnkaAgent-1.32.0-c375584c.pkg
+    if [[ $(ankacluster --version | cut -d- -f1 | sed 's/\.//g') -lt 1320 ]]; then
+      if [[ "$(arch)" == "arm64" ]]; then
+        curl -O https://downloads.veertu.com/anka/AnkaAgentArm-1.32.0-c375584c.pkg && sudo installer -pkg AnkaAgentArm-1.32.0-c375584c.pkg -tgt / && sudo rm -f AnkaAgentArm-1.32.0-c375584c.pkg
+      else
+        curl -O https://downloads.veertu.com/anka/AnkaAgent-1.32.0-c375584c.pkg && sudo installer -pkg AnkaAgent-1.32.0-c375584c.pkg -tgt / && sudo rm -f AnkaAgent-1.32.0-c375584c.pkg
+      fi
     fi
     ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --drain-mode"
   fi
