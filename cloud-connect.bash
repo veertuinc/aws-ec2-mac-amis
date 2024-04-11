@@ -161,7 +161,7 @@ else # ==================================================================
   sleep 10 # AWS instances, on first start, and even with functional networking (we ping github.com above), will have 169.254.169.254 assigned to the default interface and since joining happens very early in the startup process, that'll be what is assigned in the controller and cause problems.
   
   # Always upgrade to the proper agent version first, to support drain-mode and other newer flags/options
-  if [[ $(curl -s ${ANKA_REGISTRY_API_CERTS} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/api/v1/status" | jq -r '.body.version' | cut -d- -f1 | sed 's/\.//g') -lt $(ankacluster --version | cut -d- -f1 | sed 's/\.//g') ]]; then
+  if [[ $(curl -s ${ANKA_REGISTRY_API_CERTS} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/api/v1/status" | jq -r '.body.version' | cut -d- -f1 | sed 's/\.//g') -gt $(ankacluster --version | cut -d- -f1 | sed 's/\.//g') ]]; then
     curl -O ${ANKA_REGISTRY_API_CERTS} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/pkg/${AGENT_PKG_NAME}"
     installer -pkg ${AGENT_PKG_NAME} -tgt /
   fi
