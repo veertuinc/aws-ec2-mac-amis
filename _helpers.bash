@@ -5,6 +5,12 @@ AWS_INSTANCE_USER="ec2-user"
 RESIZE_DISK_PLIST_PATH="${LAUNCH_LOCATION}com.veertu.aws-ec2-mac-amis.resize-disk.plist"
 CLOUD_CONNECT_PLIST_PATH="${LAUNCH_LOCATION}com.veertu.aws-ec2-mac-amis.cloud-connect.plist"
 
+ARCH="$(arch)"
+[[ "${ARCH}" != "arm64" ]] && ARCH="amd64"
+
+# get agent package name
+[[ ${ARCH} == "arm64" ]] && AGENT_PKG_NAME="AnkaAgentArm.pkg" || AGENT_PKG_NAME="AnkaAgent.pkg"
+
 modify_hosts() {
   [[ -z $1 ]] && echo "ARG 1 missing" && exit 1
   [[ -z $1 ]] && echo "ARG 2 missing" && exit 1

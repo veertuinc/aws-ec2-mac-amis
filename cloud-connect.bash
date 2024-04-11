@@ -157,18 +157,15 @@ else # ==================================================================
       anka --debug registry -r "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}" pull "${TEMPLATE}"
     done
   fi
-  if ${ANKA_DRAINED_ON_JOIN:-false}; then
-    # Upgrade agent to minimum required version for drain mode
-    if [[ $(ankacluster --version | cut -d- -f1 | sed 's/\.//g') -lt 1320 ]]; then
-      if [[ "$(arch)" == "arm64" ]]; then
-        curl -O https://downloads.veertu.com/anka/AnkaAgentArm-1.32.0-c375584c.pkg && sudo installer -pkg AnkaAgentArm-1.32.0-c375584c.pkg -tgt / && sudo rm -f AnkaAgentArm-1.32.0-c375584c.pkg
-      else
-        curl -O https://downloads.veertu.com/anka/AnkaAgent-1.32.0-c375584c.pkg && sudo installer -pkg AnkaAgent-1.32.0-c375584c.pkg -tgt / && sudo rm -f AnkaAgent-1.32.0-c375584c.pkg
-      fi
-    fi
-    ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --drain-mode"
-  fi
+  ${ANKA_DRAINED_ON_JOIN:-false} && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --drain-mode"
   sleep 10 # AWS instances, on first start, and even with functional networking (we ping github.com above), will have 169.254.169.254 assigned to the default interface and since joining happens very early in the startup process, that'll be what is assigned in the controller and cause problems.
+  
+  # Always upgrade to the proper agent version first, to support drain-mode and other newer flags/options
+  if [[ $(curl -s ${ANKA_REGISTRY_API_CERTS} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/api/v1/status" | jq -r '.body.version' | cut -d- -f1 | sed 's/\.//g') -lt $(ankacluster --version | cut -d- -f1 | sed 's/\.//g') ]]; then
+    curl -O ${ANKA_REGISTRY_API_CERTS} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/pkg/${AGENT_PKG_NAME}"
+    installer -pkg ${AGENT_PKG_NAME} -tgt /
+  fi
+
   /usr/local/bin/ankacluster join ${ANKA_CONTROLLER_ADDRESS} ${ANKA_JOIN_ARGS}
   # Do a quick check to see if there was a problem post-start
   sleep 3
