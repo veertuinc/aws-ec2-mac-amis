@@ -106,6 +106,8 @@ unset HISTFILE
 [[ ! -e $CLOUD_CONNECT_PLIST_PATH ]] && sudo -E bash -c "./cloud-connect.bash"
 
 sudo chown -R $AWS_INSTANCE_USER:staff ~/aws-ec2-mac-amis
+# error: cannot open '.git/FETCH_HEAD': Permission denied
+sudo chown -R $AWS_INSTANCE_USER:staff ~/aws-ec2-mac-amis/.git/*
 
 echo "done" > ~/prep
 unset HISTFILE
