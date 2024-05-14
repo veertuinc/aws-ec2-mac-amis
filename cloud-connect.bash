@@ -95,6 +95,9 @@ else # ==================================================================
       sudo installer -pkg $FULL_FILE_NAME -tgt /
     fi
   fi
+  if ${ANKA_ROUTE_METADATA_TO_VMS:-false}; then
+    networksetup -setadditionalroutes Ethernet 169.254.169.254 255.255.255.255 $(sudo defaults read /Library/Preferences/SystemConfiguration/com.apple.vmnet.plist Shared_Net_Address)
+  fi
   INSTANCE_ID="$(curl -s http://169.254.169.254/latest/meta-data/instance-id -H "X-aws-ec2-metadata-token: ${IMDS_TOKEN}")"
   INSTANCE_PRIVATE_IP="$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4 -H "X-aws-ec2-metadata-token: ${IMDS_TOKEN}")"
   INSTANCE_PUBLIC_IP="$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 -H "X-aws-ec2-metadata-token: ${IMDS_TOKEN}")"
