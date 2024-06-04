@@ -88,6 +88,11 @@ else # ==================================================================
       exit 1
     fi
   fi
+  # run one of the scripts
+  if [[ -n "${ANKA_EXECUTE_SCRIPT}" ]]; then
+    ./scripts/${ANKA_EXECUTE_SCRIPT} || true
+  fi
+  # install latest anka CLI version
   if ${ANKA_UPGRADE_CLI_TO_LATEST:-false}; then
     FULL_FILE_NAME="$(curl -Ls -r 0-1 -o /dev/null -w %{url_effective} https://veertu.com/downloads/anka-virtualization-latest | cut -d/ -f5)"
     if [[ ! -e ./$FULL_FILE_NAME ]]; then 
