@@ -1,5 +1,7 @@
 #/usr/bin/env bash
 set -exo pipefail
+unset HISTFILE
+. ../_helpers.bash
 ARCH=$([[ $(arch) == "arm64" ]] && echo "arm64" || echo "amd64")
 LATEST_VERSION=$(curl -sL https://api.github.com/repos/veertuinc/anklet/releases/latest | jq -r ".tag_name")
 curl -L -O https://github.com/veertuinc/anklet/releases/download/${LATEST_VERSION}/anklet_${LATEST_VERSION}_darwin_${ARCH}.zip
