@@ -7,6 +7,7 @@ unzip anklet_${LATEST_VERSION}_darwin_${ARCH}.zip
 chmod +x anklet_${LATEST_VERSION}_darwin_${ARCH}
 cp anklet_${LATEST_VERSION}_darwin_${ARCH} /usr/local/bin/anklet
 mkdir -p ~/.config/
+sudo chown -R $AWS_INSTANCE_USER:staff ~/.config
 cd ~/.config/
 git clone --no-checkout --depth=1 --filter=blob:none https://github.com/veertuinc/anklet.git
 pushd anklet
