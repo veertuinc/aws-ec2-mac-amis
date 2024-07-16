@@ -131,6 +131,13 @@ else # ==================================================================
     fi
     [[ -n "${ANKA_REGISTRY_API_CA}" ]] && ANKA_REGISTRY_API_CERTS="${ANKA_REGISTRY_API_CERTS} --cacert ${ANKA_REGISTRY_API_CA}"
   fi
+
+  # Always upgrade to the proper agent version first, to support drain-mode and other newer flags/options
+  if [[ $(curl -s ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/status" | jq -r '.body.version' | cut -d- -f1 | sed 's/\.//g') -gt $(ankacluster --version | cut -d- -f1 | sed 's/\.//g') ]]; then
+    curl -O ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/pkg/${AGENT_PKG_NAME}"
+    installer -pkg ${AGENT_PKG_NAME} -tgt /
+  fi
+
   # Join arguments
   ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS:-"$*"}" # used for older getting started script + enables overriding defaults from inside plist instead of user-data
   if sudo ankacluster join --help | grep "node-id"; then # make sure we don't try to join with --node-id unless it's an available option for ankacluster
@@ -155,26 +162,38 @@ else # ==================================================================
     fi
     anka license show
   fi
+
   /usr/local/bin/ankacluster disjoin || true
+
+  ${ANKA_DRAINED_ON_JOIN:-false} && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --drain-mode"
+  
   if [[ -n "${ANKA_PULL_TEMPLATES_REGEX}" ]]; then
     TEMPLATES_TO_PULL=()
     TEMPLATES_TO_PULL+=($(curl -s ${ANKA_REGISTRY_API_CERTS} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/vm" | jq -r '.body[] | keys[]' | grep -E "${ANKA_PULL_TEMPLATES_REGEX}" || true))
     TEMPLATES_TO_PULL+=($(curl -s ${ANKA_REGISTRY_API_CERTS} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/vm" | jq -r '.body[] | values[]' | grep -E "${ANKA_PULL_TEMPLATES_REGEX}" || true))
     echo "${TEMPLATES_TO_PULL[@]}"
+    if ${ANKA_PULL_TEMPLATES_REGEX_DISTRIBUTE:-false}; then
+        /usr/local/bin/ankacluster join ${ANKA_CONTROLLER_ADDRESS} ${ANKA_JOIN_ARGS}
+    fi
     for TEMPLATE in "${TEMPLATES_TO_PULL[@]}"; do
-      anka --debug registry -r "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}" pull "${TEMPLATE}"
+      if ${ANKA_PULL_TEMPLATES_REGEX_DISTRIBUTE:-false}; then
+        DISTRIBUTION_ID="$(curl -X POST -s ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm/distribute" -d "{\"template_id\": \"${TEMPLATE}\", \"node_ids\": [\"${INSTANCE_ID}\"]}" | jq -r '.body.id' || true)"
+        while curl -s ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm/distribute?id=${DISTRIBUTION_ID}" | jq -r ".body.distribute_status[${INSTANCE_ID}] | .status" != "true"; do
+          sleep 10
+        done
+      else
+        anka --debug registry -r "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}" pull "${TEMPLATE}"
+      fi
     done
+    if ${ANKA_PULL_TEMPLATES_REGEX_DISTRIBUTE:-false}; then
+      curl -X POST ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/node/config" -d "{\"node_id\": \"${INSTANCE_ID}\", \"drain_mode\": false}"
+    fi
   fi
-  ${ANKA_DRAINED_ON_JOIN:-false} && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --drain-mode"
   sleep 10 # AWS instances, on first start, and even with functional networking (we ping github.com above), will have 169.254.169.254 assigned to the default interface and since joining happens very early in the startup process, that'll be what is assigned in the controller and cause problems.
-  
-  # Always upgrade to the proper agent version first, to support drain-mode and other newer flags/options
-  if [[ $(curl -s ${ANKA_REGISTRY_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/status" | jq -r '.body.version' | cut -d- -f1 | sed 's/\.//g') -gt $(ankacluster --version | cut -d- -f1 | sed 's/\.//g') ]]; then
-    curl -O ${ANKA_REGISTRY_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/pkg/${AGENT_PKG_NAME}"
-    installer -pkg ${AGENT_PKG_NAME} -tgt /
-  fi
 
-  /usr/local/bin/ankacluster join ${ANKA_CONTROLLER_ADDRESS} ${ANKA_JOIN_ARGS}
+  if ! ${ANKA_PULL_TEMPLATES_REGEX_DISTRIBUTE:-false}; then
+    /usr/local/bin/ankacluster join ${ANKA_CONTROLLER_ADDRESS} ${ANKA_JOIN_ARGS}
+  fi
   # Do a quick check to see if there was a problem post-start
   sleep 3
   ankacluster status
