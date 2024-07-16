@@ -178,9 +178,9 @@ else # ==================================================================
     for TEMPLATE_NAME in "${TEMPLATES_TO_PULL[@]}"; do
       if ${ANKA_PULL_TEMPLATES_REGEX_DISTRIBUTE:-false}; then
         TEMPLATE_ID=$(curl -s ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm" | jq -r ".body[] | select(.name == \"$TEMPLATE_NAME\") | .id" || true)
-        DISTRIBUTION_ID="$(curl -X POST -s ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm/distribute" -d "{\"template_id\": \"${TEMPLATE_ID}\", \"node_ids\": [\"${INSTANCE_ID}\"]}" | jq -r '.body.id' || true)"
+        DISTRIBUTION_ID="$(curl -X POST -s ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm/distribute" -d "{\"template_id\": \"${TEMPLATE_ID}\", \"node_ids\": [\"${INSTANCE_ID}\"]}" | jq -r '.body.request_id' || true)"
         sleep 2
-        if [[ $(curl -s ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm/distribute?id=${DISTRIBUTION_ID}" | jq -r ".body.distribute_status[\"${INSTANCE_ID}\"] | .status") = "null" ]]; then
+        if [[ $(curl -s ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm/distribute?id=${DISTRIBUTION_ID}" | jq -r ".body.distribute_status[\"${INSTANCE_ID}\"] | .status") == "null" ]]; then
           echo "Distribution failed; unable to get status of distribution"
           exit 1
         fi
