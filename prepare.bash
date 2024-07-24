@@ -37,6 +37,9 @@ sudo mdutil -a -i off / || true
 sudo mdutil -a -i off || true
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.metadata.mds.plist || true
 sudo rm -rf /.Spotlight-V100/*
+rm -rf ~/Library/Metadata/CoreSpotlight/ || true
+killall -KILL Spotlight spotlightd mds || true
+sudo rm -rf /System/Volums/Data/.Spotlight-V100 || true
 
 # Enable VNC
 ## Disabled as it now throws a warning and doesn't work.
