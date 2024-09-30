@@ -100,6 +100,13 @@ else # ==================================================================
       sudo installer -pkg $FULL_FILE_NAME -tgt /
     fi
   fi
+  if [[ -n "${ANKA_UPGRADE_CLI_TO_VERSION}" ]]; then
+    FULL_FILE_NAME="Anka-${ANKA_UPGRADE_CLI_TO_VERSION}.pkg"
+    if [[ ! -e ./$FULL_FILE_NAME ]]; then 
+      curl -S -L -o ./$FULL_FILE_NAME https://downloads.veertu.com/anka/$FULL_FILE_NAME
+      sudo installer -pkg $FULL_FILE_NAME -tgt /
+    fi
+  fi
   if ${ANKA_ROUTE_METADATA_TO_VMS:-false}; then
     networksetup -setadditionalroutes Ethernet 169.254.169.254 255.255.255.255 $(sudo defaults read /Library/Preferences/SystemConfiguration/com.apple.vmnet.plist Shared_Net_Address)
   fi
