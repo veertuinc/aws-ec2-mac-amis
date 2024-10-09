@@ -48,11 +48,10 @@ pushd anklet
     plugins
   git checkout-index -a -f
 popd
-# load the plist
-launchctl load -w /Library/LaunchDaemons/com.veertu.anklet.plist
 echo "Anklet has been installed and loaded."
 echo "You can control it with the following commands:"
 echo "  sudo launchctl start com.veertu.anklet"
 echo "  sudo launchctl stop com.veertu.anklet"
 echo "  sudo launchctl unload -w /Library/LaunchDaemons/com.veertu.anklet.plist"
 echo "  sudo launchctl load -w /Library/LaunchDaemons/com.veertu.anklet.plist"
+echo "Be sure to create your ~/.config/anklet/config.yml before loading!"
