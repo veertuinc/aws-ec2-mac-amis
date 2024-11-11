@@ -1,5 +1,7 @@
 #/usr/bin/env bash
 set -exo pipefail
+pwd
+ls -laht ./
 unset HISTFILE
 if [ "$EUID" -ne 0 ]; then
   echo "Please run as root using sudo create-plist.bash"
