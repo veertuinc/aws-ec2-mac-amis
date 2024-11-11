@@ -48,6 +48,9 @@ pushd anklet
     plugins
   git checkout-index -a -f
 popd
+if [[ -n "${ANKLET_CONFIG}" ]]; then
+  echo "${ANKLET_CONFIG}" > ~/.config/anklet/config.yml
+fi
 echo "Anklet has been installed and loaded."
 echo "You can control it with the following commands:"
 echo "  sudo launchctl start com.veertu.anklet"
