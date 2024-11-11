@@ -48,8 +48,8 @@ pushd anklet
     plugins
   git checkout-index -a -f
 popd
-if [[ -n "${ANKLET_CONFIG}" ]]; then
-  echo "${ANKLET_CONFIG}" > ~/.config/anklet/config.yml
+if [[ -n "${ANKA_EXECUTE_SCRIPT_CONFIG}" ]]; then
+  echo "${ANKA_EXECUTE_SCRIPT_CONFIG}" > ~/.config/anklet/config.yml
 fi
 echo "Anklet has been installed and loaded."
 echo "You can control it with the following commands:"
