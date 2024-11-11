@@ -1,13 +1,11 @@
 #/usr/bin/env bash
 set -exo pipefail
-pwd
-ls -laht ./
 unset HISTFILE
 if [ "$EUID" -ne 0 ]; then
   echo "Please run as root using sudo create-plist.bash"
   exit 1
 fi
-. ../_helpers.bash
+. ./_helpers.bash
 launchctl unload -w /Library/LaunchDaemons/com.veertu.anklet.plist || true
 # Create the plist file
 cat <<EOF > /Library/LaunchDaemons/com.veertu.anklet.plist
