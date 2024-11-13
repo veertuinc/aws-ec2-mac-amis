@@ -36,7 +36,7 @@ EOF
 ARCH=$([[ $(arch) == "arm64" ]] && echo "arm64" || echo "amd64")
 LATEST_VERSION=$(curl -sL https://api.github.com/repos/veertuinc/anklet/releases | jq -r '.[0].tag_name')
 curl -L -O https://github.com/veertuinc/anklet/releases/download/"${LATEST_VERSION}"/anklet_v"${LATEST_VERSION}"_darwin_"${ARCH}".zip
-unzip -f anklet_v"${LATEST_VERSION}"_darwin_"${ARCH}".zip
+unzip -o anklet_v"${LATEST_VERSION}"_darwin_"${ARCH}".zip
 chmod +x anklet_v"${LATEST_VERSION}"_darwin_"${ARCH}"
 cp anklet_v"${LATEST_VERSION}"_darwin_"${ARCH}" /usr/local/bin/anklet
 mkdir -p ~/.config/
