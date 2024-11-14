@@ -15,8 +15,16 @@ cat <<EOF > /Library/LaunchDaemons/com.veertu.anklet.plist
 <dict>
     <key>Label</key>
     <string>com.veertu.anklet</string>
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>HOME</key>
+      <string>/Users/${$AWS_INSTANCE_USER}</string>
+    </dict>
     <key>ProgramArguments</key>
     <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>-l</string>
         <string>/usr/local/bin/anklet</string>
     </array>
     <key>WorkingDirectory</key>
@@ -30,6 +38,10 @@ cat <<EOF > /Library/LaunchDaemons/com.veertu.anklet.plist
     </dict>
     <key>AssociatedBundleIdentifiers</key>
     <string>com.veertu.anklet</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/anklet-plist.err.log</string>
+    <key>StandardOutPath</key>
+    <string>/tmp/anklet-plist.out.log</string> 
 </dict>
 </plist>
 EOF
