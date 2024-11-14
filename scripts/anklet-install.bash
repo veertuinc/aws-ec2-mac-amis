@@ -44,12 +44,14 @@ cd ~/.config/
 export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 if [[ -d anklet ]]; then
   pushd anklet
-    git init
-    git config core.sparseCheckout true
-    git remote add origin https://github.com/veertuinc/anklet.git
-    git sparse-checkout set plugins
-    git fetch origin main
-    git checkout main
+    if [[ ! -d .git ]]; then
+      git init
+      git config core.sparseCheckout true
+      git remote add origin https://github.com/veertuinc/anklet.git
+      git sparse-checkout set plugins
+      git fetch origin main
+      git checkout main
+    fi
   popd
 else
   git clone --no-checkout --depth=1 --filter=blob:none https://github.com/veertuinc/anklet.git
