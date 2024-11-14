@@ -40,9 +40,18 @@ unzip -o anklet_v"${LATEST_VERSION}"_darwin_"${ARCH}".zip
 chmod +x anklet_v"${LATEST_VERSION}"_darwin_"${ARCH}"
 cp anklet_v"${LATEST_VERSION}"_darwin_"${ARCH}" /usr/local/bin/anklet
 mkdir -p ~/.config/
-[[ $(whoami) == "ec2-user" ]] && sudo chown -R $AWS_INSTANCE_USER:staff ~/.config
 cd ~/.config/
-if [[ ! -d anklet ]]; then
+export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+if [[ -d anklet ]]; then
+  pushd anklet
+    git init
+    git config core.sparseCheckout true
+    git remote add origin https://github.com/veertuinc/anklet.git
+    git sparse-checkout set plugins
+    git fetch origin main
+    git checkout main
+  popd
+else
   git clone --no-checkout --depth=1 --filter=blob:none https://github.com/veertuinc/anklet.git
   pushd anklet
     git reset -q -- \
@@ -51,10 +60,11 @@ if [[ ! -d anklet ]]; then
   popd
 fi
 if [[ -n "${ANKA_EXECUTE_SCRIPT_CONFIG}" ]]; then
-  echo "${ANKA_EXECUTE_SCRIPT_CONFIG}" > ~/.config/anklet/config.yml
+  printf "%b" "${ANKA_EXECUTE_SCRIPT_CONFIG}" > ~/.config/anklet/config.yml
 else 
   echo "WARNING: Be sure to create your ~/.config/anklet/config.yml before loading!"
 fi
+[[ $(whoami) == "ec2-user" ]] && sudo chown -R $AWS_INSTANCE_USER:staff ~/.config
 echo "Anklet has been installed and loaded."
 echo "You can control it with the following commands:"
 echo "  sudo launchctl start com.veertu.anklet"
