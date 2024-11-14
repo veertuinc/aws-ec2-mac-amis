@@ -73,7 +73,5 @@ echo "  sudo launchctl start com.veertu.anklet"
 echo "  sudo launchctl stop com.veertu.anklet"
 echo "  sudo launchctl unload -w /Library/LaunchDaemons/com.veertu.anklet.plist"
 echo "  sudo launchctl load -w /Library/LaunchDaemons/com.veertu.anklet.plist"
-if [[ -n "${ANKA_EXECUTE_SCRIPT_CONFIG}" ]]; then
-  sudo launchctl load -w /Library/LaunchDaemons/com.veertu.anklet.plist
-  sudo launchctl start com.veertu.anklet || true
-fi
+sudo launchctl load -w /Library/LaunchDaemons/com.veertu.anklet.plist
+sudo launchctl start com.veertu.anklet || true
