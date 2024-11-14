@@ -73,5 +73,5 @@ echo "  sudo launchctl start com.veertu.anklet"
 echo "  sudo launchctl stop com.veertu.anklet"
 echo "  sudo launchctl unload -w /Library/LaunchDaemons/com.veertu.anklet.plist"
 echo "  sudo launchctl load -w /Library/LaunchDaemons/com.veertu.anklet.plist"
-sudo launchctl load -w /Library/LaunchDaemons/com.veertu.anklet.plist
-sudo launchctl start com.veertu.anklet || true
+launchctl load -w /Library/LaunchDaemons/com.veertu.anklet.plist
+launchctl start com.veertu.anklet || true
