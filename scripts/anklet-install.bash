@@ -18,7 +18,7 @@ cat <<EOF > /Library/LaunchDaemons/com.veertu.anklet.plist
     <key>EnvironmentVariables</key>
     <dict>
       <key>HOME</key>
-      <string>/Users/${$AWS_INSTANCE_USER}</string>
+      <string>/Users/${AWS_INSTANCE_USER}</string>
     </dict>
     <key>ProgramArguments</key>
     <array>
