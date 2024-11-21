@@ -6,6 +6,7 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 . ./_helpers.bash
+ANKA_ANKLET_PLIST_LOG_DIR="${ANKA_ANKLET_PLIST_LOG_DIR:-"/tmp"}"
 launchctl unload -w /Library/LaunchDaemons/com.veertu.anklet.plist || true
 # Create the plist file
 cat <<EOF > /Library/LaunchDaemons/com.veertu.anklet.plist
@@ -39,9 +40,9 @@ cat <<EOF > /Library/LaunchDaemons/com.veertu.anklet.plist
     <key>AssociatedBundleIdentifiers</key>
     <string>com.veertu.anklet</string>
     <key>StandardErrorPath</key>
-    <string>/tmp/anklet-plist.err.log</string>
+    <string>${ANKA_ANKLET_PLIST_LOG_DIR}/anklet-plist.err.log</string>
     <key>StandardOutPath</key>
-    <string>/tmp/anklet-plist.out.log</string> 
+    <string>${ANKA_ANKLET_PLIST_LOG_DIR}/anklet-plist.out.log</string> 
 </dict>
 </plist>
 EOF
