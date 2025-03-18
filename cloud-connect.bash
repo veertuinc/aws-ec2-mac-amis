@@ -84,7 +84,7 @@ else # ==================================================================
   eval "$(curl -s http://169.254.169.254/latest/user-data -H "X-aws-ec2-metadata-token: ${IMDS_TOKEN}" | grep "ANKA_" | grep -v "^#")" # eval needed to handle quotes wrapping ARGS ENV
   # pull latest scripts and restart script
   if [[ -n "${ANKA_PULL_LATEST_CLOUD_CONNECT}" ]]; then
-    chown ec2-user:staff /Users/ec2-user/aws-ec2-mac-amis/.git/FETCH_HEAD || true
+    sudo chown ec2-user:staff /Users/ec2-user/aws-ec2-mac-amis/.git/FETCH_HEAD || true
     git config --global --add safe.directory /Users/ec2-user/aws-ec2-mac-amis
     git fetch
     if [[ ! $(git rev-parse HEAD) == $(git rev-parse @{u}) ]]; then # Ensure we don't restart the script if there aren't any changes.
