@@ -3,7 +3,8 @@ set -exo pipefail
 echo ""
 echo "]] ANKA CLOUD CONNECT SCRIPT STARTED"
 [[ ! $EUID -eq 0 ]] && echo "RUN AS ROOT!" && exit 1
-export PATH="${PATH}:/opt/homebrew/bin:/opt/homebrew/sbin" # support new arm brew location
+export PATH="${PATH}:$(brew --prefix)/bin:$(brew --prefix)/sbin" # support new arm brew location
+export PATH="${PATH}:$(brew --prefix)/opt/openssl/bin" # support for OpenSSL and UAK
 export HOME="/Users/ec2-user/" # git config --global --add safe.directory /Users/ec2-user/aws-ec2-mac-amis fatal: $HOME not set
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $SCRIPT_DIR
@@ -120,6 +121,7 @@ else # ==================================================================
   if [[ -n "${ANKA_REGISTRY_OVERRIDE_IP}" && -n "${ANKA_REGISTRY_OVERRIDE_DOMAIN}" ]]; then
     modify_hosts $ANKA_REGISTRY_OVERRIDE_DOMAIN $ANKA_REGISTRY_OVERRIDE_IP
   fi
+
   # Certificate support
   ANKA_CONTROLLER_API_CERTS="${ANKA_CONTROLLER_API_CERTS:-""}"
   if [[ -z "${ANKA_CONTROLLER_API_CERTS}" && -n "${ANKA_CONTROLLER_API_CERT}" ]]; then
@@ -141,10 +143,38 @@ else # ==================================================================
     fi
     [[ -n "${ANKA_REGISTRY_API_CA}" ]] && ANKA_REGISTRY_API_CERTS="${ANKA_REGISTRY_API_CERTS} --cacert ${ANKA_REGISTRY_API_CA}"
   fi
+  ANKA_CONTROLLER_API_AUTH="${ANKA_CONTROLLER_API_CERTS}"
+  ANKA_REGISTRY_API_AUTH="${ANKA_REGISTRY_API_CERTS}"
+
+  # UAK support
+  ANKA_CONTROLLER_API_AUTHORIZATION_BEARER="${ANKA_CONTROLLER_API_AUTHORIZATION_BEARER:-""}"
+  if [[ -z "${ANKA_CONTROLLER_API_AUTHORIZATION_BEARER}" && -n "${ANKA_CONTROLLER_API_UAK_ID}" ]]; then
+    if [[ -z "${ANKA_CONTROLLER_API_UAK_STRING}" ]]; then
+      if [[ -z "${ANKA_CONTROLLER_API_UAK_FILE_PATH}" ]]; then
+        echo "missing controller uak string or path" && exit 2
+      fi
+    else
+      echo "${ANKA_CONTROLLER_API_UAK_STRING}" | base64 --decode > /tmp/controller-uak-encrypted.pem
+      openssl rsa -in /tmp/controller-uak-encrypted.pem --out /tmp/controller-uak-decrypted.pem
+      do_tap ${ANKA_CONTROLLER_ADDRESS} ${ANKA_CONTROLLER_API_UAK_ID} /tmp/controller-uak-decrypted.pem ANKA_CONTROLLER_API_AUTH
+    fi
+  fi
+  ANKA_REGISTRY_API_AUTHORIZATION_BEARER="${ANKA_REGISTRY_API_AUTHORIZATION_BEARER:-""}"
+  if [[ -z "${ANKA_REGISTRY_API_AUTHORIZATION_BEARER}" && -n "${ANKA_REGISTRY_API_UAK_ID}" ]]; then
+    if [[ -z "${ANKA_REGISTRY_API_UAK_STRING}" ]]; then
+      if [[ -z "${ANKA_REGISTRY_API_UAK_FILE_PATH}" ]]; then
+        echo "missing registry uak string or path" && exit 2
+      fi
+    else
+      echo "${ANKA_REGISTRY_API_UAK_STRING}" | base64 --decode > /tmp/registry-uak-encrypted.pem
+      openssl rsa -in /tmp/registry-uak-encrypted.pem --out /tmp/registry-uak-decrypted.pem
+      do_tap ${ANKA_REGISTRY_ADDRESS} ${ANKA_REGISTRY_API_UAK_ID} /tmp/registry-uak-decrypted.pem ANKA_CONTROLLER_API_AUTH
+    fi
+  fi
 
   # Always upgrade to the proper agent version first, to support drain-mode and other newer flags/options
-  if [[ $(curl -s ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/status" | jq -r '.body.version' | cut -d- -f1 | sed 's/\.//g') -gt $(ankacluster --version | cut -d- -f1 | sed 's/\.//g') ]]; then
-    curl -O ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/pkg/${AGENT_PKG_NAME}"
+  if [[ $(curl -s ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/api/v1/status" | jq -r '.body.version' | cut -d- -f1 | sed 's/\.//g') -gt $(ankacluster --version | cut -d- -f1 | sed 's/\.//g') ]]; then
+    curl -O ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/pkg/${AGENT_PKG_NAME}"
     installer -pkg ${AGENT_PKG_NAME} -tgt /
   fi
 

@@ -20,4 +20,22 @@ modify_hosts() {
   echo "$2 $1" | sudo tee -a $HOSTS_LOCATION
 }
 
+do_tap() {
+  [[ -z $1 ]] && echo "ARG 1 (url) is required" && exit 1
+  URL=$1
+  [[ -z $2 ]] && echo "ARG 2 (id) is required" && exit 1
+  UAK_ID=$2
+  [[ -z $3 ]] && echo "ARG 3 (pem file path) is required" && exit 1
+  UAK_SECRET_PEM_PATH=$3
+  [[ -z $4 ]] && echo "ARG 4 (output variable name) is required" && exit 1
+  OUTPUT_VARIABLE_NAME=$4
+  trap 'rm -f "$UAK_SECRET_PEM_PATH"' EXIT
+  echo -n $(curl -s ${URL}/tap/v1/hand -d "{\"id\": \"${UAK_ID}\"}") | base64 -d > /tmp/to_decrypt
+  openssl pkeyutl -decrypt -inkey ${UAK_SECRET_PEM_PATH} -in /tmp/to_decrypt -out /tmp/decrypted -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256
+  SHAKE_RESPONSE=$(curl -s ${URL}/tap/v1/shake -d "{\"id\": \"${UAK_ID}\", \"secret\": \"$(cat /tmp/decrypted)\" }")
+  ACCESS_TOKEN=$(echo "${SHAKE_RESPONSE}" | jq -r '.data' | base64)
+  curl -sH "Authorization: Bearer ${ACCESS_TOKEN}" ${URL}/api/v1/status
+  eval "${OUTPUT_VARIABLE_NAME}=\"-H \"Authorization: Bearer ${ACCESS_TOKEN}\""
+}
+
 true
