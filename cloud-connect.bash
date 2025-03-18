@@ -190,6 +190,20 @@ else # ==================================================================
   # [[ ! "${ANKA_JOIN_ARGS}" =~ "--reserve-space" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --reserve-space $(df -H | grep /dev/ | head -1 | awk '{print $4}')B"
   ${ANKA_USE_PUBLIC_IP:-false} && INSTANCE_IP="${INSTANCE_PUBLIC_IP}" || INSTANCE_IP="${INSTANCE_PRIVATE_IP}"
   [[ ! "${ANKA_JOIN_ARGS}" =~ "--host" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --host ${INSTANCE_IP}"
+
+  # check if certs are even needed; throw error if user didn't include them
+  if [[ "$(curl -s "${ANKA_CONTROLLER_ADDRESS}/api/v1/status" | jq '.message')" == "Authentication Required" ]]; then
+    if [[ -z "${ANKA_CONTROLLER_API_CERTS}" ]]; then
+      echo "missing controller certs" && exit 2
+    fi
+  fi
+  if [[ "$(curl -s "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/status" | jq '.message')" == "Authentication Required" ]]; then
+    if [[ -z "${ANKA_REGISTRY_API_CERTS}" ]]; then
+      echo "missing registry certs" && exit 2
+    fi
+  fi
+  
+  # Handle license
   anka license accept-eula 2>/dev/null || true
   if [[ -n "${ANKA_LICENSE}" ]]; then # Activate license if present
     anka license show
