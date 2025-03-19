@@ -182,12 +182,12 @@ else # ==================================================================
       if [[ -z "${ANKA_REGISTRY_API_UAK_FILE_PATH}" ]]; then
         echo "missing registry uak string or path to pem file" && exit 2
       else
-        do_tap ${ANKA_REGISTRY_ADDRESS} ${ANKA_REGISTRY_API_UAK_ID} ${ANKA_REGISTRY_API_UAK_FILE_PATH} ANKA_REGISTRY_API_AUTHORIZATION_BEARER
+        do_tap ${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS} ${ANKA_REGISTRY_API_UAK_ID} ${ANKA_REGISTRY_API_UAK_FILE_PATH} ANKA_REGISTRY_API_AUTHORIZATION_BEARER
       fi
     else
       echo "${ANKA_REGISTRY_API_UAK_STRING}" | base64 --decode > /tmp/registry-uak-encrypted.pem
       openssl rsa -in /tmp/registry-uak-encrypted.pem --out /tmp/registry-uak-decrypted.pem
-      do_tap ${ANKA_REGISTRY_ADDRESS} ${ANKA_REGISTRY_API_UAK_ID} /tmp/registry-uak-decrypted.pem ANKA_REGISTRY_API_AUTHORIZATION_BEARER
+      do_tap ${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS} ${ANKA_REGISTRY_API_UAK_ID} /tmp/registry-uak-decrypted.pem ANKA_REGISTRY_API_AUTHORIZATION_BEARER
     fi
   fi
 
