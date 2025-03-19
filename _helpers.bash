@@ -35,7 +35,7 @@ do_tap() {
   SHAKE_RESPONSE=$(curl -s ${URL}/tap/v1/shake -d "{\"id\": \"${UAK_ID}\", \"secret\": \"$(cat /tmp/decrypted)\" }")
   ACCESS_TOKEN=$(echo "${SHAKE_RESPONSE}" | jq -r '.data' | base64)
   curl -sH "Authorization: Bearer ${ACCESS_TOKEN}" ${URL}/api/v1/status
-  eval "${OUTPUT_VARIABLE_NAME}=\"-H \\"Authorization: Bearer ${ACCESS_TOKEN}\\"\""
+  eval "${OUTPUT_VARIABLE_NAME}=\"-H \\\"Authorization: Bearer ${ACCESS_TOKEN}\\\"\""
 }
 
 true
