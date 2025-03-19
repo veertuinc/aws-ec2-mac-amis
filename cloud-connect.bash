@@ -135,6 +135,12 @@ else # ==================================================================
     fi
     [[ -n "${ANKA_CONTROLLER_API_CA}" ]] && ANKA_CONTROLLER_API_CERTS="${ANKA_CONTROLLER_API_CERTS} --cacert ${ANKA_CONTROLLER_API_CA}"
   fi
+  if [[ -n "${ANKA_CONTROLLER_API_CERTS}" ]]; then
+    ANKA_CONTROLLER_API_AUTH="${ANKA_CONTROLLER_API_CERTS}"
+    # Get registry URL
+    ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS="$(curl -s ${ANKA_CONTROLLER_API_AUTH} ${ANKA_CONTROLLER_ADDRESS}/api/v1/status | jq -r '.body.registry_address')"
+  fi
+
   ANKA_REGISTRY_API_CERTS="${ANKA_REGISTRY_API_CERTS:-""}"
   if [[ -z "${ANKA_REGISTRY_API_CERTS}" && -n "${ANKA_REGISTRY_API_CERT}" ]]; then
     ANKA_REGISTRY_API_CERTS="--cert ${ANKA_REGISTRY_API_CERT}"
@@ -144,9 +150,6 @@ else # ==================================================================
       echo "missing registry cert key" && exit 2
     fi
     [[ -n "${ANKA_REGISTRY_API_CA}" ]] && ANKA_REGISTRY_API_CERTS="${ANKA_REGISTRY_API_CERTS} --cacert ${ANKA_REGISTRY_API_CA}"
-  fi
-  if [[ -n "${ANKA_CONTROLLER_API_CERTS}" ]]; then
-    ANKA_CONTROLLER_API_AUTH="${ANKA_CONTROLLER_API_CERTS}"
   fi
   if [[ -n "${ANKA_REGISTRY_API_CERTS}" ]]; then
     ANKA_REGISTRY_API_AUTH="${ANKA_REGISTRY_API_CERTS}"
@@ -167,6 +170,12 @@ else # ==================================================================
       do_tap ${ANKA_CONTROLLER_ADDRESS} ${ANKA_CONTROLLER_API_UAK_ID} /tmp/controller-uak-decrypted.pem ANKA_CONTROLLER_API_AUTHORIZATION_BEARER
     fi
   fi
+  if [[ -n "${ANKA_CONTROLLER_API_AUTHORIZATION_BEARER}" ]]; then
+    ANKA_CONTROLLER_API_AUTH="${ANKA_CONTROLLER_API_AUTHORIZATION_BEARER}"  
+    # Get registry URL
+    ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS="$(curl -s ${ANKA_CONTROLLER_API_AUTH} ${ANKA_CONTROLLER_ADDRESS}/api/v1/status | jq -r '.body.registry_address')"
+  fi
+
   ANKA_REGISTRY_API_AUTHORIZATION_BEARER="${ANKA_REGISTRY_API_AUTHORIZATION_BEARER:-""}"
   if [[ -z "${ANKA_REGISTRY_API_AUTHORIZATION_BEARER}" && -n "${ANKA_REGISTRY_API_UAK_ID}" ]]; then
     if [[ -z "${ANKA_REGISTRY_API_UAK_STRING}" ]]; then
@@ -181,9 +190,7 @@ else # ==================================================================
       do_tap ${ANKA_REGISTRY_ADDRESS} ${ANKA_REGISTRY_API_UAK_ID} /tmp/registry-uak-decrypted.pem ANKA_REGISTRY_API_AUTHORIZATION_BEARER
     fi
   fi
-  if [[ -n "${ANKA_CONTROLLER_API_AUTHORIZATION_BEARER}" ]]; then
-    ANKA_CONTROLLER_API_AUTH="${ANKA_CONTROLLER_API_AUTHORIZATION_BEARER}"
-  fi
+
   if [[ -n "${ANKA_REGISTRY_API_AUTHORIZATION_BEARER}" ]]; then
     ANKA_REGISTRY_API_AUTH="${ANKA_REGISTRY_API_AUTHORIZATION_BEARER}"
   fi
@@ -199,8 +206,6 @@ else # ==================================================================
   if sudo ankacluster join --help | grep "node-id"; then # make sure we don't try to join with --node-id unless it's an available option for ankacluster
     [[ ! "${ANKA_JOIN_ARGS}" =~ "--node-id" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --node-id ${INSTANCE_ID}"
   fi
-  # Get registry URL
-  ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS="$(curl -s ${ANKA_CONTROLLER_API_AUTH} ${ANKA_CONTROLLER_ADDRESS}/api/v1/status | jq -r '.body.registry_address')"
   HARDWARE_TYPE="$(system_profiler SPHardwareDataType | grep 'Hardware UUID' | awk '{print $NF}')"
   # removed in 13.0.1/3.2.0 as not having enough space for the VMs to use can be a problem
   # [[ ! "${ANKA_JOIN_ARGS}" =~ "--reserve-space" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --reserve-space $(df -H | grep /dev/ | head -1 | awk '{print $4}')B"
