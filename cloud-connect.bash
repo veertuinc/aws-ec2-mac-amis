@@ -21,8 +21,8 @@ disjoin() {
     /usr/local/bin/ankacluster disjoin &
     rm -f "${CLOUD_CONNECT_JOINED_FILE}"
     if [[ -n "${ANKA_CONTROLLER_ADDRESS}" ]]; then
-      NODE_ID="$(curl -s ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" | jq -r ".body | .[] | select(.node_name==\"$(hostname)\") | .node_id")"
-      curl -s ${ANKA_CONTROLLER_API_CERTS} -X DELETE "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" -H "Content-Type: application/json" -d "{\"node_id\": \"$NODE_ID\"}"
+      NODE_ID="$(curl -s ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" | jq -r ".body | .[] | select(.node_name==\"$(hostname)\") | .node_id")"
+      curl -s ${ANKA_CONTROLLER_API_AUTH} -X DELETE "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" -H "Content-Type: application/json" -d "{\"node_id\": \"$NODE_ID\"}"
     fi
     wait $!
   fi
@@ -144,33 +144,47 @@ else # ==================================================================
     fi
     [[ -n "${ANKA_REGISTRY_API_CA}" ]] && ANKA_REGISTRY_API_CERTS="${ANKA_REGISTRY_API_CERTS} --cacert ${ANKA_REGISTRY_API_CA}"
   fi
-  ANKA_CONTROLLER_API_AUTH="${ANKA_CONTROLLER_API_CERTS}"
-  ANKA_REGISTRY_API_AUTH="${ANKA_REGISTRY_API_CERTS}"
+  if [[ -n "${ANKA_CONTROLLER_API_CERTS}" ]]; then
+    ANKA_CONTROLLER_API_AUTH="${ANKA_CONTROLLER_API_CERTS}"
+  fi
+  if [[ -n "${ANKA_REGISTRY_API_CERTS}" ]]; then
+    ANKA_REGISTRY_API_AUTH="${ANKA_REGISTRY_API_CERTS}"
+  fi
 
   # UAK support
   ANKA_CONTROLLER_API_AUTHORIZATION_BEARER="${ANKA_CONTROLLER_API_AUTHORIZATION_BEARER:-""}"
   if [[ -z "${ANKA_CONTROLLER_API_AUTHORIZATION_BEARER}" && -n "${ANKA_CONTROLLER_API_UAK_ID}" ]]; then
     if [[ -z "${ANKA_CONTROLLER_API_UAK_STRING}" ]]; then
       if [[ -z "${ANKA_CONTROLLER_API_UAK_FILE_PATH}" ]]; then
-        echo "missing controller uak string or path" && exit 2
+        echo "missing controller uak string or path to pem file" && exit 2
+      else
+        do_tap ${ANKA_CONTROLLER_ADDRESS} ${ANKA_CONTROLLER_API_UAK_ID} ${ANKA_CONTROLLER_API_UAK_FILE_PATH} ANKA_CONTROLLER_API_AUTHORIZATION_BEARER
       fi
     else
       echo "${ANKA_CONTROLLER_API_UAK_STRING}" | base64 --decode > /tmp/controller-uak-encrypted.pem
       openssl rsa -in /tmp/controller-uak-encrypted.pem --out /tmp/controller-uak-decrypted.pem
-      do_tap ${ANKA_CONTROLLER_ADDRESS} ${ANKA_CONTROLLER_API_UAK_ID} /tmp/controller-uak-decrypted.pem ANKA_CONTROLLER_API_AUTH
+      do_tap ${ANKA_CONTROLLER_ADDRESS} ${ANKA_CONTROLLER_API_UAK_ID} /tmp/controller-uak-decrypted.pem ANKA_CONTROLLER_API_AUTHORIZATION_BEARER
     fi
   fi
   ANKA_REGISTRY_API_AUTHORIZATION_BEARER="${ANKA_REGISTRY_API_AUTHORIZATION_BEARER:-""}"
   if [[ -z "${ANKA_REGISTRY_API_AUTHORIZATION_BEARER}" && -n "${ANKA_REGISTRY_API_UAK_ID}" ]]; then
     if [[ -z "${ANKA_REGISTRY_API_UAK_STRING}" ]]; then
       if [[ -z "${ANKA_REGISTRY_API_UAK_FILE_PATH}" ]]; then
-        echo "missing registry uak string or path" && exit 2
+        echo "missing registry uak string or path to pem file" && exit 2
+      else
+        do_tap ${ANKA_REGISTRY_ADDRESS} ${ANKA_REGISTRY_API_UAK_ID} ${ANKA_REGISTRY_API_UAK_FILE_PATH} ANKA_REGISTRY_API_AUTHORIZATION_BEARER
       fi
     else
       echo "${ANKA_REGISTRY_API_UAK_STRING}" | base64 --decode > /tmp/registry-uak-encrypted.pem
       openssl rsa -in /tmp/registry-uak-encrypted.pem --out /tmp/registry-uak-decrypted.pem
-      do_tap ${ANKA_REGISTRY_ADDRESS} ${ANKA_REGISTRY_API_UAK_ID} /tmp/registry-uak-decrypted.pem ANKA_CONTROLLER_API_AUTH
+      do_tap ${ANKA_REGISTRY_ADDRESS} ${ANKA_REGISTRY_API_UAK_ID} /tmp/registry-uak-decrypted.pem ANKA_REGISTRY_API_AUTHORIZATION_BEARER
     fi
+  fi
+  if [[ -n "${ANKA_CONTROLLER_API_AUTHORIZATION_BEARER}" ]]; then
+    ANKA_CONTROLLER_API_AUTH="${ANKA_CONTROLLER_API_AUTHORIZATION_BEARER}"
+  fi
+  if [[ -n "${ANKA_REGISTRY_API_AUTHORIZATION_BEARER}" ]]; then
+    ANKA_REGISTRY_API_AUTH="${ANKA_REGISTRY_API_AUTHORIZATION_BEARER}"
   fi
 
   # Always upgrade to the proper agent version first, to support drain-mode and other newer flags/options
@@ -185,7 +199,7 @@ else # ==================================================================
     [[ ! "${ANKA_JOIN_ARGS}" =~ "--node-id" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --node-id ${INSTANCE_ID}"
   fi
   # Get registry URL
-  ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS="$(curl -s ${ANKA_CONTROLLER_API_CERTS} ${ANKA_CONTROLLER_ADDRESS}/api/v1/status | jq -r '.body.registry_address')"
+  ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS="$(curl -s ${ANKA_CONTROLLER_API_AUTH} ${ANKA_CONTROLLER_ADDRESS}/api/v1/status | jq -r '.body.registry_address')"
   HARDWARE_TYPE="$(system_profiler SPHardwareDataType | grep 'Hardware UUID' | awk '{print $NF}')"
   # removed in 13.0.1/3.2.0 as not having enough space for the VMs to use can be a problem
   # [[ ! "${ANKA_JOIN_ARGS}" =~ "--reserve-space" ]] && ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS} --reserve-space $(df -H | grep /dev/ | head -1 | awk '{print $4}')B"
@@ -194,13 +208,13 @@ else # ==================================================================
 
   # check if certs are even needed; throw error if user didn't include them
   if [[ "$(curl -s "${ANKA_CONTROLLER_ADDRESS}/api/v1/status" | jq '.message')" == "Authentication Required" ]]; then
-    if [[ -z "${ANKA_CONTROLLER_API_CERTS}" ]]; then
-      echo "missing controller certs" && exit 2
+    if [[ -z "${ANKA_CONTROLLER_API_CERTS}" && -z "${ANKA_CONTROLLER_API_AUTHORIZATION_BEARER}" ]]; then
+      echo "missing controller certs or uak" && exit 2
     fi
   fi
   if [[ "$(curl -s "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/status" | jq '.message')" == "Authentication Required" ]]; then
-    if [[ -z "${ANKA_REGISTRY_API_CERTS}" ]]; then
-      echo "missing registry certs" && exit 2
+    if [[ -z "${ANKA_REGISTRY_API_CERTS}" && -z "${ANKA_REGISTRY_API_AUTHORIZATION_BEARER}" ]]; then
+      echo "missing registry certs or uak" && exit 2
     fi
   fi
   
@@ -213,7 +227,7 @@ else # ==================================================================
       ANKA_LICENSE_ACTIVATE_STDOUT="$(anka license activate -f "${ANKA_LICENSE}" || true)"
       echo "${ANKA_LICENSE_ACTIVATE_STDOUT}"
       # Post the fulfillment ID to the centralized logs
-      curl ${ANKA_REGISTRY_API_CERTS} -v "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/log" -d "{\"machine_name\": \"${INSTANCE_ID} | ${HARDWARE_TYPE}\", \"service\": \"AWS Cloud Connect Service\", \"host\": \"\", \"content\": \"${ANKA_LICENSE_ACTIVATE_STDOUT}\"}"
+      curl ${ANKA_REGISTRY_API_AUTH} -v "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/log" -d "{\"machine_name\": \"${INSTANCE_ID} | ${HARDWARE_TYPE}\", \"service\": \"AWS Cloud Connect Service\", \"host\": \"\", \"content\": \"${ANKA_LICENSE_ACTIVATE_STDOUT}\"}"
     fi
     anka license show
   fi
@@ -224,22 +238,22 @@ else # ==================================================================
   
   if [[ -n "${ANKA_PULL_TEMPLATES_REGEX}" ]]; then
     TEMPLATES_TO_PULL=()
-    TEMPLATES_TO_PULL+=($(curl -s ${ANKA_REGISTRY_API_CERTS} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/vm" | jq -r '.body[] | keys[]' | grep -E "${ANKA_PULL_TEMPLATES_REGEX}" || true))
-    TEMPLATES_TO_PULL+=($(curl -s ${ANKA_REGISTRY_API_CERTS} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/vm" | jq -r '.body[] | values[]' | grep -E "${ANKA_PULL_TEMPLATES_REGEX}" || true))
+    TEMPLATES_TO_PULL+=($(curl -s ${ANKA_REGISTRY_API_AUTH} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/vm" | jq -r '.body[] | keys[]' | grep -E "${ANKA_PULL_TEMPLATES_REGEX}" || true))
+    TEMPLATES_TO_PULL+=($(curl -s ${ANKA_REGISTRY_API_AUTH} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/vm" | jq -r '.body[] | values[]' | grep -E "${ANKA_PULL_TEMPLATES_REGEX}" || true))
     echo "${TEMPLATES_TO_PULL[@]}"
     if ${ANKA_PULL_TEMPLATES_REGEX_DISTRIBUTE:-false}; then
         /usr/local/bin/ankacluster join ${ANKA_CONTROLLER_ADDRESS} ${ANKA_JOIN_ARGS}
     fi
     for TEMPLATE_NAME in "${TEMPLATES_TO_PULL[@]}"; do
       if ${ANKA_PULL_TEMPLATES_REGEX_DISTRIBUTE:-false}; then
-        TEMPLATE_ID=$(curl -s ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm" | jq -r ".body[] | select(.name == \"$TEMPLATE_NAME\") | .id" || true)
-        DISTRIBUTION_ID="$(curl -X POST -s ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm/distribute" -d "{\"template_id\": \"${TEMPLATE_ID}\", \"node_ids\": [\"${INSTANCE_ID}\"]}" | jq -r '.body.request_id' || true)"
+        TEMPLATE_ID=$(curl -s ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm" | jq -r ".body[] | select(.name == \"$TEMPLATE_NAME\") | .id" || true)
+        DISTRIBUTION_ID="$(curl -X POST -s ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm/distribute" -d "{\"template_id\": \"${TEMPLATE_ID}\", \"node_ids\": [\"${INSTANCE_ID}\"]}" | jq -r '.body.request_id' || true)"
         sleep 2
-        if [[ $(curl -s ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm/distribute?id=${DISTRIBUTION_ID}" | jq -r ".body.distribute_status[\"${INSTANCE_ID}\"] | .status") == "null" ]]; then
+        if [[ $(curl -s ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm/distribute?id=${DISTRIBUTION_ID}" | jq -r ".body.distribute_status[\"${INSTANCE_ID}\"] | .status") == "null" ]]; then
           echo "Distribution failed; unable to get status of distribution"
           exit 1
         fi
-        while [[ "$(curl -s ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm/distribute?id=${DISTRIBUTION_ID}" | jq -r ".body.distribute_status[\"${INSTANCE_ID}\"] | .status")" != "true" ]]; do
+        while [[ "$(curl -s ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm/distribute?id=${DISTRIBUTION_ID}" | jq -r ".body.distribute_status[\"${INSTANCE_ID}\"] | .status")" != "true" ]]; do
           sleep 10
         done
       else
@@ -247,7 +261,7 @@ else # ==================================================================
       fi
     done
     if ${ANKA_PULL_TEMPLATES_REGEX_DISTRIBUTE:-false}; then
-      curl -X POST ${ANKA_CONTROLLER_API_CERTS} "${ANKA_CONTROLLER_ADDRESS}/api/v1/node/config" -d "{\"node_id\": \"${INSTANCE_ID}\", \"drain_mode\": false}"
+      curl -X POST ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/api/v1/node/config" -d "{\"node_id\": \"${INSTANCE_ID}\", \"drain_mode\": false}"
     fi
   fi
   sleep 10 # AWS instances, on first start, and even with functional networking (we ping github.com above), will have 169.254.169.254 assigned to the default interface and since joining happens very early in the startup process, that'll be what is assigned in the controller and cause problems.
