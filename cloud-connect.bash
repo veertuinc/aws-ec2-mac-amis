@@ -22,6 +22,7 @@ disjoin() {
     /usr/local/bin/ankacluster disjoin &
     rm -f "${CLOUD_CONNECT_JOINED_FILE}"
     if [[ -n "${ANKA_CONTROLLER_ADDRESS}" ]]; then
+      configure_uak
       NODE_ID="$(do_curl -s ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" | jq -r ".body | .[] | select(.node_name==\"$(hostname)\") | .node_id")"
       do_curl -s ${ANKA_CONTROLLER_API_AUTH} -X DELETE "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" -H "Content-Type: application/json" -d "{"node_id": "$NODE_ID"}"
     fi
@@ -156,44 +157,7 @@ else # ==================================================================
   fi
 
   # UAK support
-  ANKA_CONTROLLER_API_AUTHORIZATION_BEARER="${ANKA_CONTROLLER_API_AUTHORIZATION_BEARER:-""}"
-  if [[ -z "${ANKA_CONTROLLER_API_AUTHORIZATION_BEARER}" && -n "${ANKA_CONTROLLER_API_UAK_ID}" ]]; then
-    if [[ -z "${ANKA_CONTROLLER_API_UAK_STRING}" ]]; then
-      if [[ -z "${ANKA_CONTROLLER_API_UAK_FILE_PATH}" ]]; then
-        echo "missing controller uak string or path to pem file" && exit 2
-      else
-        do_tap ${ANKA_CONTROLLER_ADDRESS} ${ANKA_CONTROLLER_API_UAK_ID} ${ANKA_CONTROLLER_API_UAK_FILE_PATH} ANKA_CONTROLLER_API_AUTHORIZATION_BEARER
-      fi
-    else
-      echo "${ANKA_CONTROLLER_API_UAK_STRING}" | base64 --decode > /tmp/controller-uak-encrypted.pem
-      openssl rsa -in /tmp/controller-uak-encrypted.pem --out /tmp/controller-uak-decrypted.pem
-      do_tap ${ANKA_CONTROLLER_ADDRESS} ${ANKA_CONTROLLER_API_UAK_ID} /tmp/controller-uak-decrypted.pem ANKA_CONTROLLER_API_AUTHORIZATION_BEARER
-    fi
-  fi
-  if [[ -n "${ANKA_CONTROLLER_API_AUTHORIZATION_BEARER}" ]]; then
-    ANKA_CONTROLLER_API_AUTH="${ANKA_CONTROLLER_API_AUTHORIZATION_BEARER}"  
-    # Get registry URL
-    ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS="$(do_curl -s ${ANKA_CONTROLLER_API_AUTH} ${ANKA_CONTROLLER_ADDRESS}/api/v1/status | jq -r '.body.registry_address')"
-  fi
-
-  ANKA_REGISTRY_API_AUTHORIZATION_BEARER="${ANKA_REGISTRY_API_AUTHORIZATION_BEARER:-""}"
-  if [[ -z "${ANKA_REGISTRY_API_AUTHORIZATION_BEARER}" && -n "${ANKA_REGISTRY_API_UAK_ID}" ]]; then
-    if [[ -z "${ANKA_REGISTRY_API_UAK_STRING}" ]]; then
-      if [[ -z "${ANKA_REGISTRY_API_UAK_FILE_PATH}" ]]; then
-        echo "missing registry uak string or path to pem file" && exit 2
-      else
-        do_tap ${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS} ${ANKA_REGISTRY_API_UAK_ID} ${ANKA_REGISTRY_API_UAK_FILE_PATH} ANKA_REGISTRY_API_AUTHORIZATION_BEARER
-      fi
-    else
-      echo "${ANKA_REGISTRY_API_UAK_STRING}" | base64 --decode > /tmp/registry-uak-encrypted.pem
-      openssl rsa -in /tmp/registry-uak-encrypted.pem --out /tmp/registry-uak-decrypted.pem
-      do_tap ${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS} ${ANKA_REGISTRY_API_UAK_ID} /tmp/registry-uak-decrypted.pem ANKA_REGISTRY_API_AUTHORIZATION_BEARER
-    fi
-  fi
-
-  if [[ -n "${ANKA_REGISTRY_API_AUTHORIZATION_BEARER}" ]]; then
-    ANKA_REGISTRY_API_AUTH="${ANKA_REGISTRY_API_AUTHORIZATION_BEARER}"
-  fi
+  configure_uak
 
   # Always upgrade to the proper agent version first, to support drain-mode and other newer flags/options
   CURRENT_CONTROLLER_VERSION="$(do_curl -s ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/api/v1/status" | jq -r '.body.version' | cut -d- -f1 | sed 's/\.//g')"
