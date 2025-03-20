@@ -44,9 +44,8 @@ do_tap() {
 }
 
 do_curl() {
+  # we need to eval or else UAK Authorizaton Bearer will have broken quotes
   eval curl "$@"
 }
-
-
 
 true
