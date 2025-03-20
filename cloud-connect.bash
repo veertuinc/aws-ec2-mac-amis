@@ -203,8 +203,6 @@ else # ==================================================================
     installer -pkg ${AGENT_PKG_NAME} -tgt /
   fi
 
-  sleep 20
-
   # Join arguments
   ANKA_JOIN_ARGS="${ANKA_JOIN_ARGS:-"$*"}" # used for older getting started script + enables overriding defaults from inside plist instead of user-data
   if sudo ankacluster join --help | grep "node-id"; then # make sure we don't try to join with --node-id unless it's an available option for ankacluster
