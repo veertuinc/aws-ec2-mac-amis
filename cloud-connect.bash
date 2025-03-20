@@ -24,7 +24,7 @@ disjoin() {
     if [[ -n "${ANKA_CONTROLLER_ADDRESS}" ]]; then
       configure_uak
       NODE_ID="$(do_curl -s ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" | jq -r ".body | .[] | select(.node_name==\"$(hostname)\") | .node_id")"
-      do_curl -s ${ANKA_CONTROLLER_API_AUTH} -X DELETE "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" -H "Content-Type: application/json" -d "{"node_id": "$NODE_ID"}"
+      do_curl -s ${ANKA_CONTROLLER_API_AUTH} -X DELETE "${ANKA_CONTROLLER_ADDRESS}/api/v1/node" -H "Content-Type: application/json" -d "{\\\"node_id\\\": \\\"${NODE_ID}\\\"}"
     fi
     wait $!
   fi
