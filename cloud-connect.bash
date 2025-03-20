@@ -280,7 +280,7 @@ else # ==================================================================
   # Do a quick check to see if there was a problem post-start
   sleep 3
   ankacluster status
-  cat /var/log/veertu/anka_agent.ERROR || true
+  tail -50 /var/log/veertu/anka_agent.ERROR || true
   [[ -n "$(ankacluster status | grep "not running" || true)" ]] && exit 1
   touch "${CLOUD_CONNECT_JOINED_FILE}" # create file that indicates whether cloud-connect joined to the controller or not using userdata so that we don't disjoin manually joined users.
   trap disjoin 0 # Disjoin after we joined properly to avoid unloading prematurely
