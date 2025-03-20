@@ -34,8 +34,8 @@ do_tap() {
   openssl pkeyutl -decrypt -inkey ${UAK_SECRET_PEM_PATH} -in /tmp/to_decrypt -out /tmp/decrypted -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256
   SHAKE_RESPONSE=$(curl -s ${URL}/tap/v1/shake -d "{\"id\": \"${UAK_ID}\", \"secret\": \"$(cat /tmp/decrypted)\" }")
   ACCESS_TOKEN=$(echo "${SHAKE_RESPONSE}" | jq -r '.data' | base64)
-  if ! curl -sH "Authorization: Bearer ${ACCESS_TOKEN}" ${URL}/api/v1/status; then
-    if ! curl -sH "Authorization: Bearer ${ACCESS_TOKEN}" ${URL}/registry/status; then
+  if [[ $(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer ${ACCESS_TOKEN}" ${URL}/api/v1/status) != "200" ]]; then
+    if [[ $(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer ${ACCESS_TOKEN}" ${URL}/registry/status) != "200" ]]; then
       echo "Failed to authenticate with ${URL}"
       exit 1
     fi
