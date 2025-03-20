@@ -40,7 +40,9 @@ do_tap() {
       exit 1
     fi
   fi
-  eval "${OUTPUT_VARIABLE_NAME}='-H \"Authorization: Bearer ${ACCESS_TOKEN}\"'"
+  eval "${OUTPUT_VARIABLE_NAME}=\"-H 'Authorization: Bearer ${ACCESS_TOKEN}'\""
 }
+
+
 
 true
