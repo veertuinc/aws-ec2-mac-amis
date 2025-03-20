@@ -196,10 +196,10 @@ else # ==================================================================
   fi
 
   # Always upgrade to the proper agent version first, to support drain-mode and other newer flags/options
-  CURRENT_CONTROLLER_VERSION="$(curl -s "${ANKA_CONTROLLER_API_AUTH}" "${ANKA_CONTROLLER_ADDRESS}/api/v1/status" | jq -r '.body.version' | cut -d- -f1 | sed 's/\.//g')"
+  CURRENT_CONTROLLER_VERSION="$(curl -s ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/api/v1/status" | jq -r '.body.version' | cut -d- -f1 | sed 's/\.//g')"
   [[ "${CURRENT_CONTROLLER_VERSION}" == "null" ]] && { echo "error: unable to get controller version" && exit 1; }
   if [[ "${CURRENT_CONTROLLER_VERSION}" -gt $(ankacluster --version | cut -d- -f1 | sed 's/\.//g') ]]; then
-    curl -O "${ANKA_CONTROLLER_API_AUTH}" "${ANKA_CONTROLLER_ADDRESS}/pkg/${AGENT_PKG_NAME}"
+    curl -O ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/pkg/${AGENT_PKG_NAME}"
     installer -pkg ${AGENT_PKG_NAME} -tgt /
   fi
 
@@ -235,7 +235,7 @@ else # ==================================================================
       ANKA_LICENSE_ACTIVATE_STDOUT="$(anka license activate -f "${ANKA_LICENSE}" || true)"
       echo "${ANKA_LICENSE_ACTIVATE_STDOUT}"
       # Post the fulfillment ID to the centralized logs
-      curl "${ANKA_REGISTRY_API_AUTH}" -v "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/log" -d "{\"machine_name\": \"${INSTANCE_ID} | ${HARDWARE_TYPE}\", \"service\": \"AWS Cloud Connect Service\", \"host\": \"\", \"content\": \"${ANKA_LICENSE_ACTIVATE_STDOUT}\"}"
+      curl ${ANKA_REGISTRY_API_AUTH} -v "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/log" -d "{\"machine_name\": \"${INSTANCE_ID} | ${HARDWARE_TYPE}\", \"service\": \"AWS Cloud Connect Service\", \"host\": \"\", \"content\": \"${ANKA_LICENSE_ACTIVATE_STDOUT}\"}"
     fi
     anka license show
   fi
@@ -246,22 +246,22 @@ else # ==================================================================
   
   if [[ -n "${ANKA_PULL_TEMPLATES_REGEX}" ]]; then
     TEMPLATES_TO_PULL=()
-    TEMPLATES_TO_PULL+=($(curl -s "${ANKA_REGISTRY_API_AUTH}" "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/vm" | jq -r '.body[] | keys[]' | grep -E "${ANKA_PULL_TEMPLATES_REGEX}" || true))
-    TEMPLATES_TO_PULL+=($(curl -s "${ANKA_REGISTRY_API_AUTH}" "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/vm" | jq -r '.body[] | values[]' | grep -E "${ANKA_PULL_TEMPLATES_REGEX}" || true))
+    TEMPLATES_TO_PULL+=($(curl -s ${ANKA_REGISTRY_API_AUTH} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/vm" | jq -r '.body[] | keys[]' | grep -E "${ANKA_PULL_TEMPLATES_REGEX}" || true))
+    TEMPLATES_TO_PULL+=($(curl -s ${ANKA_REGISTRY_API_AUTH} "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/registry/vm" | jq -r '.body[] | values[]' | grep -E "${ANKA_PULL_TEMPLATES_REGEX}" || true))
     echo "${TEMPLATES_TO_PULL[@]}"
     if ${ANKA_PULL_TEMPLATES_REGEX_DISTRIBUTE:-false}; then
         /usr/local/bin/ankacluster join ${ANKA_CONTROLLER_ADDRESS} ${ANKA_JOIN_ARGS}
     fi
     for TEMPLATE_NAME in "${TEMPLATES_TO_PULL[@]}"; do
       if ${ANKA_PULL_TEMPLATES_REGEX_DISTRIBUTE:-false}; then
-        TEMPLATE_ID=$(curl -s "${ANKA_CONTROLLER_API_AUTH}" "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm" | jq -r ".body[] | select(.name == \"$TEMPLATE_NAME\") | .id" || true)
-        DISTRIBUTION_ID="$(curl -X POST -s "${ANKA_CONTROLLER_API_AUTH}" "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm/distribute" -d "{\"template_id\": \"${TEMPLATE_ID}\", \"node_ids\": [\"${INSTANCE_ID}\"]}" | jq -r '.body.request_id' || true)"
+        TEMPLATE_ID=$(curl -s ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm" | jq -r ".body[] | select(.name == \"$TEMPLATE_NAME\") | .id" || true)
+        DISTRIBUTION_ID="$(curl -X POST -s ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm/distribute" -d "{\"template_id\": \"${TEMPLATE_ID}\", \"node_ids\": [\"${INSTANCE_ID}\"]}" | jq -r '.body.request_id' || true)"
         sleep 2
-        if [[ $(curl -s "${ANKA_CONTROLLER_API_AUTH}" "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm/distribute?id=${DISTRIBUTION_ID}" | jq -r ".body.distribute_status[\"${INSTANCE_ID}\"] | .status") == "null" ]]; then
+        if [[ $(curl -s ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm/distribute?id=${DISTRIBUTION_ID}" | jq -r ".body.distribute_status[\"${INSTANCE_ID}\"] | .status") == "null" ]]; then
           echo "Distribution failed; unable to get status of distribution"
           exit 1
         fi
-        while [[ "$(curl -s "${ANKA_CONTROLLER_API_AUTH}" "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm/distribute?id=${DISTRIBUTION_ID}" | jq -r ".body.distribute_status[\"${INSTANCE_ID}\"] | .status")" != "true" ]]; do
+        while [[ "$(curl -s ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/api/v1/registry/vm/distribute?id=${DISTRIBUTION_ID}" | jq -r ".body.distribute_status[\"${INSTANCE_ID}\"] | .status")" != "true" ]]; do
           sleep 10
         done
       else
@@ -269,7 +269,7 @@ else # ==================================================================
       fi
     done
     if ${ANKA_PULL_TEMPLATES_REGEX_DISTRIBUTE:-false}; then
-      curl -X POST "${ANKA_CONTROLLER_API_AUTH}" "${ANKA_CONTROLLER_ADDRESS}/api/v1/node/config" -d "{\"node_id\": \"${INSTANCE_ID}\", \"drain_mode\": false}"
+      curl -X POST ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/api/v1/node/config" -d "{\"node_id\": \"${INSTANCE_ID}\", \"drain_mode\": false}"
     fi
   fi
   sleep 10 # AWS instances, on first start, and even with functional networking (we ping github.com above), will have 169.254.169.254 assigned to the default interface and since joining happens very early in the startup process, that'll be what is assigned in the controller and cause problems.
