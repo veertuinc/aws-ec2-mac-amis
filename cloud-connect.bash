@@ -198,7 +198,9 @@ else # ==================================================================
   sleep 20
 
   # Always upgrade to the proper agent version first, to support drain-mode and other newer flags/options
-  if [[ $(curl -s "${ANKA_CONTROLLER_API_AUTH}" "${ANKA_CONTROLLER_ADDRESS}/api/v1/status" | jq -r '.body.version' | cut -d- -f1 | sed 's/\.//g') -gt $(ankacluster --version | cut -d- -f1 | sed 's/\.//g') ]]; then
+  CURRENT_CONTROLLER_VERSION="$(curl -s "${ANKA_CONTROLLER_API_AUTH}" "${ANKA_CONTROLLER_ADDRESS}/api/v1/status" | jq -r '.body.version' | cut -d- -f1 | sed 's/\.//g')"
+  [[ "${CURRENT_CONTROLLER_VERSION}" == "null" ]] && { echo "error: unable to get controller version" && exit 1; }
+  if [[ "${CURRENT_CONTROLLER_VERSION}" -gt $(ankacluster --version | cut -d- -f1 | sed 's/\.//g') ]]; then
     curl -O "${ANKA_CONTROLLER_API_AUTH}" "${ANKA_CONTROLLER_ADDRESS}/pkg/${AGENT_PKG_NAME}"
     installer -pkg ${AGENT_PKG_NAME} -tgt /
   fi
