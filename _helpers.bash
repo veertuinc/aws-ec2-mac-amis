@@ -43,6 +43,10 @@ do_tap() {
   eval "${OUTPUT_VARIABLE_NAME}=\"-H 'Authorization: Bearer ${ACCESS_TOKEN}'\""
 }
 
+do_curl() {
+  eval curl "$@"
+}
+
 
 
 true
