@@ -9,6 +9,9 @@ export PATH="${PATH}:$(brew --prefix)/bin:$(brew --prefix)/sbin" # support new a
 export PATH="${PATH}:$(brew --prefix)/opt/openssl/bin" # support for OpenSSL and UAK
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $SCRIPT_DIR
+
+
+sleep 20
 export CLOUD_CONNECT_JOINED_FILE=".cloud-connect-joined"
 [[ "$(du -sk /var/log/cloud-connect.log | awk '{print $1/1024}' | cut -d. -f1)" -gt 100 ]] && echo "" > /var/log/cloud-connect.log # empty log file so that it doesn't grow uncontrollably.
 echo "Waiting for networking..."
