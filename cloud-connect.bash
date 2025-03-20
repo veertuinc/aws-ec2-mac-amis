@@ -138,7 +138,7 @@ else # ==================================================================
   if [[ -n "${ANKA_CONTROLLER_API_CERTS}" ]]; then
     ANKA_CONTROLLER_API_AUTH="${ANKA_CONTROLLER_API_CERTS}"
     # Get registry URL
-    ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS="$(curl -s ${ANKA_CONTROLLER_API_AUTH} ${ANKA_CONTROLLER_ADDRESS}/api/v1/status | jq -r '.body.registry_address')"
+    ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS="$(do_curl -s ${ANKA_CONTROLLER_API_AUTH} ${ANKA_CONTROLLER_ADDRESS}/api/v1/status | jq -r '.body.registry_address')"
   fi
 
   ANKA_REGISTRY_API_CERTS="${ANKA_REGISTRY_API_CERTS:-""}"
@@ -173,7 +173,7 @@ else # ==================================================================
   if [[ -n "${ANKA_CONTROLLER_API_AUTHORIZATION_BEARER}" ]]; then
     ANKA_CONTROLLER_API_AUTH="${ANKA_CONTROLLER_API_AUTHORIZATION_BEARER}"  
     # Get registry URL
-    ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS="$(eval curl -s ${ANKA_CONTROLLER_API_AUTH} ${ANKA_CONTROLLER_ADDRESS}/api/v1/status | jq -r '.body.registry_address')"
+    ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS="$(do_curl -s ${ANKA_CONTROLLER_API_AUTH} ${ANKA_CONTROLLER_ADDRESS}/api/v1/status | jq -r '.body.registry_address')"
   fi
 
   ANKA_REGISTRY_API_AUTHORIZATION_BEARER="${ANKA_REGISTRY_API_AUTHORIZATION_BEARER:-""}"
