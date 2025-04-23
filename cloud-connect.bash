@@ -127,6 +127,18 @@ else # ==================================================================
     modify_hosts $ANKA_REGISTRY_OVERRIDE_DOMAIN $ANKA_REGISTRY_OVERRIDE_IP
   fi
 
+  # Handle license
+  anka license accept-eula 2>/dev/null || true
+  if [[ -n "${ANKA_LICENSE}" ]]; then # Activate license if present
+    anka license show
+    if ! anka --machine-readable license show | grep 'status": "valid"'; then
+      echo "Activating anka license..."
+      ANKA_LICENSE_ACTIVATE_STDOUT="$(anka license activate -f "${ANKA_LICENSE}" || true)"
+      echo "${ANKA_LICENSE_ACTIVATE_STDOUT}"
+    fi
+    anka license show
+  fi
+
   if [[ -z "${ANKA_CONTROLLER_ADDRESS}" ]]; then
     echo "missing controller address, no need to run join" && exit
   fi
@@ -195,19 +207,10 @@ else # ==================================================================
       echo "missing registry certs or uak" && exit 2
     fi
   fi
-  
-  # Handle license
-  anka license accept-eula 2>/dev/null || true
-  if [[ -n "${ANKA_LICENSE}" ]]; then # Activate license if present
-    anka license show
-    if ! anka --machine-readable license show | grep 'status": "valid"'; then
-      echo "Activating anka license..."
-      ANKA_LICENSE_ACTIVATE_STDOUT="$(anka license activate -f "${ANKA_LICENSE}" || true)"
-      echo "${ANKA_LICENSE_ACTIVATE_STDOUT}"
-      # Post the fulfillment ID to the centralized logs
-      do_curl ${ANKA_REGISTRY_API_AUTH} -v "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/log" -d "{\"machine_name\": \"${INSTANCE_ID} | ${HARDWARE_TYPE}\", \"service\": \"AWS Cloud Connect Service\", \"host\": \"\", \"content\": \"${ANKA_LICENSE_ACTIVATE_STDOUT}\"}"
-    fi
-    anka license show
+
+  # Post the fulfillment ID to the centralized logs
+  if [[ -n "${ANKA_LICENSE_ACTIVATE_STDOUT}" ]]; then
+    do_curl ${ANKA_REGISTRY_API_AUTH} -v "${ANKA_CONTROLLER_CONFIG_REGISTRY_ADDRESS}/log" -d "{\"machine_name\": \"${INSTANCE_ID} | ${HARDWARE_TYPE}\", \"service\": \"AWS Cloud Connect Service\", \"host\": \"\", \"content\": \"${ANKA_LICENSE_ACTIVATE_STDOUT}\"}"
   fi
 
   /usr/local/bin/ankacluster disjoin || true
