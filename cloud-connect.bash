@@ -127,6 +127,10 @@ else # ==================================================================
     modify_hosts $ANKA_REGISTRY_OVERRIDE_DOMAIN $ANKA_REGISTRY_OVERRIDE_IP
   fi
 
+  if [[ -z "${ANKA_CONTROLLER_ADDRESS}" ]]; then
+    echo "missing controller address, no need to run join" && exit
+  fi
+
   # Certificate support
   ANKA_CONTROLLER_API_CERTS="${ANKA_CONTROLLER_API_CERTS:-""}"
   if [[ -z "${ANKA_CONTROLLER_API_CERTS}" && -n "${ANKA_CONTROLLER_API_CERT}" ]]; then
