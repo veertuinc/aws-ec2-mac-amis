@@ -7,6 +7,8 @@ cd $SCRIPT_DIR
 
 GETTING_STARTED_LOCATION="$HOME/getting-started"
 # POPULATE .zshrc
+## In 15.5 AMIs, amazon is changing .zshrc and chowning it to root... Fix that...
+sudo chown $AWS_INSTANCE_USER:staff $HOME/.zshrc
 [[ -z "$(grep "alias ll" $HOME/.zshrc)" ]] && echo "" >> $HOME/.zshrc && echo "alias ll=\"ls -laht\"" >> $HOME/.zshrc
 source ~/.zshrc || true
 # Ensure the query tool exists ; AWS has deprecated it
