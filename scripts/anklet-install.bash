@@ -7,6 +7,26 @@ if [ "$EUID" -ne 0 ]; then
 fi
 . ./_helpers.bash
 ANKA_ANKLET_PLIST_LOG_DIR="${ANKA_ANKLET_PLIST_LOG_DIR:-"/tmp"}"
+brew install logrotate
+cat <<EOF > /opt/homebrew/etc/logrotate.d/anklet
+${ANKA_ANKLET_PLIST_LOG_DIR}/anklet-plist.err.log {
+    daily
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    copytruncate
+}
+${ANKA_ANKLET_PLIST_LOG_DIR}/anklet-plist.out.log {
+    daily
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    copytruncate
+}
+EOF
+brew services start logrotate
 launchctl unload -w /Library/LaunchDaemons/com.veertu.anklet.plist || true
 # Create the plist file
 cat <<EOF > /Library/LaunchDaemons/com.veertu.anklet.plist
