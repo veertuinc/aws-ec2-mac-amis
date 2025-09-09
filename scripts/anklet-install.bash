@@ -7,6 +7,65 @@ if [ "$EUID" -ne 0 ]; then
 fi
 . ./_helpers.bash
 ANKA_ANKLET_PLIST_LOG_DIR="${ANKA_ANKLET_PLIST_LOG_DIR:-"/tmp"}"
+sudo -u ec2-user brew install logrotate
+mkdir -p /opt/homebrew/etc/logrotate.d
+cat <<EOF > /opt/homebrew/etc/logrotate.d/anklet
+${ANKA_ANKLET_PLIST_LOG_DIR}/anklet-plist.err.log {
+    daily
+    rotate 4
+    compress
+    delaycompress
+    missingok
+    copytruncate
+    maxsize 1G
+    create 0777 ec2-user staff
+    dateformat -%Y%m%d_%H:%M:%S
+}
+${ANKA_ANKLET_PLIST_LOG_DIR}/anklet-plist.out.log {
+    daily
+    rotate 4
+    compress
+    delaycompress
+    missingok
+    copytruncate
+    maxsize 1G
+    create 0777 ec2-user staff
+    dateformat -%Y%m%d_%H:%M:%S
+}
+EOF
+# the default plist for logrotate is not good enough.
+# Find the correct homebrew logrotate plist file regardless of version
+LOGROTATE_PLIST_PATH=$(ls /opt/homebrew/Cellar/logrotate/*/homebrew.mxcl.logrotate.plist | head -n 1)
+cat <<EOF > "${LOGROTATE_PLIST_PATH}"
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>homebrew.mxcl.logrotate</string>
+	<key>LimitLoadToSessionType</key>
+	<array>
+		<string>Aqua</string>
+		<string>Background</string>
+		<string>LoginWindow</string>
+		<string>StandardIO</string>
+		<string>System</string>
+	</array>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/opt/homebrew/opt/logrotate/sbin/logrotate</string>
+		<string>/opt/homebrew/etc/logrotate.conf</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>StartInterval</key>
+	<integer>60</integer>
+</dict>
+</plist>
+EOF
+sudo chown ec2-user:staff /opt/homebrew/etc/logrotate.conf
+sudo chown ec2-user:staff /opt/homebrew/etc/logrotate.d/anklet
+sudo -u ec2-user brew services start logrotate
 launchctl unload -w /Library/LaunchDaemons/com.veertu.anklet.plist || true
 # Create the plist file
 cat <<EOF > /Library/LaunchDaemons/com.veertu.anklet.plist
@@ -80,11 +139,13 @@ else
   echo "WARNING: Be sure to create your ~/.config/anklet/config.yml before loading!"
 fi
 [[ $(whoami) == "ec2-user" ]] && sudo chown -R $AWS_INSTANCE_USER:staff ~/.config
+set +x
 echo "Anklet has been installed and loaded."
 echo "You can control it with the following commands:"
 echo "  sudo launchctl start com.veertu.anklet"
 echo "  sudo launchctl stop com.veertu.anklet"
 echo "  sudo launchctl unload -w /Library/LaunchDaemons/com.veertu.anklet.plist"
 echo "  sudo launchctl load -w /Library/LaunchDaemons/com.veertu.anklet.plist"
+set -x
 launchctl load -w /Library/LaunchDaemons/com.veertu.anklet.plist
 launchctl start com.veertu.anklet || true

@@ -112,7 +112,7 @@ unset HISTFILE
 
 sudo chown -R $AWS_INSTANCE_USER:staff ~/aws-ec2-mac-amis
 # error: cannot open '.git/FETCH_HEAD': Permission denied
-sudo chown -R $AWS_INSTANCE_USER:staff ~/aws-ec2-mac-amis/.git/*
+sudo chown -R $AWS_INSTANCE_USER:staff ~/aws-ec2-mac-amis/.git
 
 brew install openssl # needed for UAK support in cloud-connect
 
