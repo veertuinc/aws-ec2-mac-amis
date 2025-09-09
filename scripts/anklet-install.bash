@@ -16,6 +16,7 @@ ${ANKA_ANKLET_PLIST_LOG_DIR}/anklet-plist.err.log {
     delaycompress
     missingok
     copytruncate
+    size 1G
 }
 ${ANKA_ANKLET_PLIST_LOG_DIR}/anklet-plist.out.log {
     daily
@@ -24,6 +25,7 @@ ${ANKA_ANKLET_PLIST_LOG_DIR}/anklet-plist.out.log {
     delaycompress
     missingok
     copytruncate
+    size 1G
 }
 EOF
 brew services start logrotate
