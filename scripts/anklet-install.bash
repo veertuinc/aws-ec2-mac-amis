@@ -16,7 +16,9 @@ ${ANKA_ANKLET_PLIST_LOG_DIR}/anklet-plist.err.log {
     delaycompress
     missingok
     copytruncate
-    size 1G
+    maxsize 1G
+    create 0777 ec2-user staff
+    dateformat -%Y%m%d_%H:%M:%S
 }
 ${ANKA_ANKLET_PLIST_LOG_DIR}/anklet-plist.out.log {
     daily
@@ -25,8 +27,41 @@ ${ANKA_ANKLET_PLIST_LOG_DIR}/anklet-plist.out.log {
     delaycompress
     missingok
     copytruncate
-    size 1G
+    maxsize 1G
+    create 0777 ec2-user staff
+    dateformat -%Y%m%d_%H:%M:%S
 }
+EOF
+# the default plist for logrotate is not good enough.
+# Find the correct homebrew logrotate plist file regardless of version
+LOGROTATE_PLIST_PATH=$(ls /opt/homebrew/Cellar/logrotate/*/homebrew.mxcl.logrotate.plist | head -n 1)
+cat <<EOF > "${LOGROTATE_PLIST_PATH}"
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>homebrew.mxcl.logrotate</string>
+	<key>LimitLoadToSessionType</key>
+	<array>
+		<string>Aqua</string>
+		<string>Background</string>
+		<string>LoginWindow</string>
+		<string>StandardIO</string>
+		<string>System</string>
+	</array>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/opt/homebrew/opt/logrotate/sbin/logrotate</string>
+		<string>-v</string>
+		<string>/opt/homebrew/etc/logrotate.conf</string>
+	</array>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>StartInterval</key>
+	<integer>60</integer>
+</dict>
+</plist>
 EOF
 brew services start logrotate
 launchctl unload -w /Library/LaunchDaemons/com.veertu.anklet.plist || true
