@@ -11,7 +11,7 @@ brew install logrotate
 cat <<EOF > /opt/homebrew/etc/logrotate.d/anklet
 ${ANKA_ANKLET_PLIST_LOG_DIR}/anklet-plist.err.log {
     daily
-    rotate 7
+    rotate 4
     compress
     delaycompress
     missingok
@@ -22,7 +22,7 @@ ${ANKA_ANKLET_PLIST_LOG_DIR}/anklet-plist.err.log {
 }
 ${ANKA_ANKLET_PLIST_LOG_DIR}/anklet-plist.out.log {
     daily
-    rotate 7
+    rotate 4
     compress
     delaycompress
     missingok
@@ -53,7 +53,6 @@ cat <<EOF > "${LOGROTATE_PLIST_PATH}"
 	<key>ProgramArguments</key>
 	<array>
 		<string>/opt/homebrew/opt/logrotate/sbin/logrotate</string>
-		<string>-v</string>
 		<string>/opt/homebrew/etc/logrotate.conf</string>
 	</array>
 	<key>RunAtLoad</key>
