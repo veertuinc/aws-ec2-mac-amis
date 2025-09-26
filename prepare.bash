@@ -116,5 +116,11 @@ sudo chown -R $AWS_INSTANCE_USER:staff ~/aws-ec2-mac-amis/.git
 
 brew install openssl # needed for UAK support in cloud-connect
 
+# Increase buffer sizes for faster image transfer
+sudo anka config recv_buffer_size 16777216
+sudo anka config send_buffer_size 16777216
+anka config recv_buffer_size 16777216
+anka config send_buffer_size 16777216
+
 echo "done" > ~/prep
 unset HISTFILE
