@@ -124,6 +124,11 @@ else # ==================================================================
     modify_hosts $ANKA_REGISTRY_OVERRIDE_DOMAIN $ANKA_REGISTRY_OVERRIDE_IP
   fi
 
+  # Execute pre-license activate commands
+  if [[ -n "${ANKA_PRE_LICENSE_ACTIVATE_COMMANDS}" ]]; then
+    eval "${ANKA_PRE_LICENSE_ACTIVATE_COMMANDS}"
+  fi
+
   # Handle license
   anka license accept-eula 2>/dev/null || true
   if [[ -n "${ANKA_LICENSE}" ]]; then # Activate license if present
@@ -134,6 +139,11 @@ else # ==================================================================
       echo "${ANKA_LICENSE_ACTIVATE_STDOUT}"
     fi
     anka license show
+  fi
+
+  # Execute post-license activate commands
+  if [[ -n "${ANKA_POST_LICENSE_ACTIVATE_COMMANDS}" ]]; then
+    eval "${ANKA_POST_LICENSE_ACTIVATE_COMMANDS}"
   fi
 
   # run one of the scripts
@@ -250,6 +260,12 @@ else # ==================================================================
   fi
   sleep 10 # AWS instances, on first start, and even with functional networking (we ping github.com above), will have 169.254.169.254 assigned to the default interface and since joining happens very early in the startup process, that'll be what is assigned in the controller and cause problems.
 
+  # Execute pre-join commands
+  if [[ -n "${ANKA_PRE_JOIN_COMMANDS}" ]]; then
+    eval "${ANKA_PRE_JOIN_COMMANDS}"
+  fi
+
+  # Join the cluster
   if ! ${ANKA_PULL_TEMPLATES_REGEX_DISTRIBUTE:-false}; then
     /usr/local/bin/ankacluster join ${ANKA_CONTROLLER_ADDRESS} ${ANKA_JOIN_ARGS}
   fi
@@ -260,6 +276,12 @@ else # ==================================================================
   [[ -n "$(ankacluster status | grep "not running" || true)" ]] && exit 1
   touch "${CLOUD_CONNECT_JOINED_FILE}" # create file that indicates whether cloud-connect joined to the controller or not using userdata so that we don't disjoin manually joined users.
   trap disjoin 0 # Disjoin after we joined properly to avoid unloading prematurely
+
+  # Execute post-join commands
+  if [[ -n "${ANKA_POST_JOIN_COMMANDS}" ]]; then
+    eval "${ANKA_POST_JOIN_COMMANDS}"
+  fi
+
   set +x
   echo "Joined and now we'll stay alive and wait for a shutdown signal..."
   mkfifo /tmp/wait-fifo; read < /tmp/wait-fifo
