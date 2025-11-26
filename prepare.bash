@@ -19,6 +19,9 @@ source ~/.zshrc || true
 # Install resize disk plist
 [[ ! -e "${RESIZE_DISK_PLIST_PATH}" ]] && sudo -E bash -c "pwd; ./resize-disk.bash"
 
+# Install prepare external disk plist
+[[ ! -e "${PREPARE_EXTERNAL_DISK_PLIST_PATH}" ]] && sudo -E bash -c "pwd; ./prepare-external-disk.bash"
+
 # Install Anka
 brew install jq # used for cloud-connect api parsing
 pushd "${HOME}"
