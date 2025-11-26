@@ -42,26 +42,25 @@ EOD
 launchctl load -w "${EXTERNAL_DISK_PLIST_PATH}"
 else
 	whoami
-	exit
   # Only run on M4 Macs with external disk
 	if diskutil list /dev/disk4; then
 		if ! diskutil list /dev/disk4 | grep -q disk4s1; then
 			diskutil eraseDisk APFS "Anka" /dev/disk4
-			for u in root ec2-user; do
-				mkdir -p /Volumes/Anka/${u}/img_lib /Volumes/Anka/${u}/state_lib /Volumes/Anka/${u}/vm_lib/.locks
-				chown -R ${u} /Volumes/Anka/${u}
-				if [[ "${u}" == "root" ]]; then
-					anka config img_lib_dir "/Volumes/Anka/${u}/img_lib"
-					anka config state_lib_dir "/Volumes/Anka/${u}/state_lib"
-					anka config vm_lib_dir "/Volumes/Anka/${u}/vm_lib"
-					anka config vm_lock_dir "/Volumes/Anka/${u}/vm_lib/.locks"
-				else
-					sudo -u ${u} anka config img_lib_dir "/Volumes/Anka/${u}/img_lib"
-					sudo -u ${u} anka config state_lib_dir "/Volumes/Anka/${u}/state_lib"
-					sudo -u ${u} anka config vm_lib_dir "/Volumes/Anka/${u}/vm_lib"
-					sudo -u ${u} anka config vm_lock_dir "/Volumes/Anka/${u}/vm_lib/.locks"
-				fi
-			done
 		fi
+		for u in root ec2-user; do
+			mkdir -p /Volumes/Anka/${u}/img_lib /Volumes/Anka/${u}/state_lib /Volumes/Anka/${u}/vm_lib/.locks
+			chown -R ${u} /Volumes/Anka/${u}
+			if [[ "${u}" == "root" ]]; then
+				anka config img_lib_dir "/Volumes/Anka/${u}/img_lib"
+				anka config state_lib_dir "/Volumes/Anka/${u}/state_lib"
+				anka config vm_lib_dir "/Volumes/Anka/${u}/vm_lib"
+				anka config vm_lock_dir "/Volumes/Anka/${u}/vm_lib/.locks"
+			else
+				sudo -u ${u} anka config img_lib_dir "/Volumes/Anka/${u}/img_lib"
+				sudo -u ${u} anka config state_lib_dir "/Volumes/Anka/${u}/state_lib"
+				sudo -u ${u} anka config vm_lib_dir "/Volumes/Anka/${u}/vm_lib"
+				sudo -u ${u} anka config vm_lock_dir "/Volumes/Anka/${u}/vm_lib/.locks"
+			fi
+		done
 	fi
 fi
