@@ -155,10 +155,18 @@ else # ==================================================================
     eval "${ANKA_POST_LICENSE_ACTIVATE_COMMANDS}"
   fi
 
-  # run one of the scripts
+  # run scripts (supports ANKA_EXECUTE_SCRIPT and ANKA_EXECUTE_SCRIPT_1, _2, etc.)
   if [[ -n "${ANKA_EXECUTE_SCRIPT}" ]]; then
-    ./scripts/${ANKA_EXECUTE_SCRIPT} || true
+    ./scripts/${ANKA_EXECUTE_SCRIPT} > /var/log/execute-script.log 2>&1 || true
   fi
+  i=1
+  while true; do
+    var_name="ANKA_EXECUTE_SCRIPT_${i}"
+    script_name="${!var_name}"
+    [[ -z "${script_name}" ]] && break
+    ./scripts/${script_name} > /var/log/execute-script-${i}.log 2>&1 || true
+    ((i++))
+  done
 
   # Check if controller address is set, otherwise exit and don't start the cloud-connect service again
   if [[ -z "${ANKA_CONTROLLER_ADDRESS}" ]]; then
