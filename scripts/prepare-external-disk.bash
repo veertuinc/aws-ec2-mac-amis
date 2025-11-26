@@ -7,6 +7,7 @@ cd $SCRIPT_DIR
 if diskutil list /dev/disk4; then
 	if ! diskutil list /dev/disk4 | grep -q disk4s1; then
 		diskutil eraseDisk APFS "Anka" /dev/disk4
+		sudo diskutil enableOwnership /Volumes/Anka
 	fi
 	diskutil list /dev/disk4
 	for username in root ec2-user; do
