@@ -3,7 +3,6 @@ set -exo pipefail
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $SCRIPT_DIR
 . ../_helpers.bash
-
 if diskutil list /dev/disk4; then
 	if ! diskutil list /dev/disk4 | grep -q disk4s1; then
 		diskutil eraseDisk APFS "Anka" /dev/disk4
