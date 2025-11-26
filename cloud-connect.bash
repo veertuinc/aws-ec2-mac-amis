@@ -116,11 +116,6 @@ else # ==================================================================
       rm -f ./$FULL_FILE_NAME # cleanup to avoid root-owned files in repo dir
     fi
   fi
-
-  # prepare external disk plist
-  if [[ "${ANKA_PREPARE_EXTERNAL_DISK:-false}" == "true" ]]; then
-    /Users/ec2-user/aws-ec2-mac-amis/prepare-external-disk.bash > /var/log/prepare-external-disk.log 2>&1
-  fi
   
   if ${ANKA_ROUTE_METADATA_TO_VMS:-false}; then
     networksetup -setadditionalroutes Ethernet 169.254.169.254 255.255.255.255 $(sudo defaults read /Library/Preferences/SystemConfiguration/com.apple.vmnet.plist Shared_Net_Address)
@@ -153,6 +148,11 @@ else # ==================================================================
   # Execute post-license activate commands
   if [[ -n "${ANKA_POST_LICENSE_ACTIVATE_COMMANDS}" ]]; then
     eval "${ANKA_POST_LICENSE_ACTIVATE_COMMANDS}"
+  fi
+
+  # prepare external disk plist
+  if [[ "${ANKA_PREPARE_EXTERNAL_DISK:-false}" == "true" ]]; then
+    /Users/ec2-user/aws-ec2-mac-amis/scripts/prepare-external-disk.bash > /var/log/prepare-external-disk.log 2>&1
   fi
 
   # run scripts (supports ANKA_EXECUTE_SCRIPT and ANKA_EXECUTE_SCRIPT_1, _2, etc.)
