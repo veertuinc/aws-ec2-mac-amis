@@ -99,11 +99,6 @@ else # ==================================================================
     fi
   fi
 
-  # prepare external disk plist
-  if [[ "${ANKA_PREPARE_EXTERNAL_DISK:-false}" == "true" ]]; then
-    /Users/ec2-user/aws-ec2-mac-amis/prepare-external-disk.bash > /var/log/prepare-external-disk.log 2>&1
-  fi
-
   # install latest anka CLI version
   if ${ANKA_UPGRADE_CLI_TO_LATEST:-false}; then
     FULL_FILE_NAME="$(curl -Ls -r 0-1 -o /dev/null -w %{url_effective} https://veertu.com/downloads/anka-virtualization-latest | cut -d/ -f5)"
@@ -121,6 +116,12 @@ else # ==================================================================
       rm -f ./$FULL_FILE_NAME # cleanup to avoid root-owned files in repo dir
     fi
   fi
+
+  # prepare external disk plist
+  if [[ "${ANKA_PREPARE_EXTERNAL_DISK:-false}" == "true" ]]; then
+    /Users/ec2-user/aws-ec2-mac-amis/prepare-external-disk.bash > /var/log/prepare-external-disk.log 2>&1
+  fi
+  
   if ${ANKA_ROUTE_METADATA_TO_VMS:-false}; then
     networksetup -setadditionalroutes Ethernet 169.254.169.254 255.255.255.255 $(sudo defaults read /Library/Preferences/SystemConfiguration/com.apple.vmnet.plist Shared_Net_Address)
   fi
