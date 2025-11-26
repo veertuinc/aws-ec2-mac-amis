@@ -41,6 +41,8 @@ cat > "${EXTERNAL_DISK_PLIST_PATH}" <<EOD
 EOD
 launchctl load -w "${EXTERNAL_DISK_PLIST_PATH}"
 else
+	whoami
+	exit
   # Only run on M4 Macs with external disk
 	if diskutil list /dev/disk4; then
 		if ! diskutil list /dev/disk4 | grep -q disk4s1; then
