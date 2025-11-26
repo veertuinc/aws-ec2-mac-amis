@@ -100,7 +100,7 @@ else # ==================================================================
   fi
 
   # prepare external disk plist
-  if [[ ! -e "${ANKA_PREPARE_EXTERNAL_DISK:-false}" ]]; then
+  if [[ ${ANKA_PREPARE_EXTERNAL_DISK:-false} == "true" ]]; then
     /Users/ec2-user/aws-ec2-mac-amis/prepare-external-disk.bash > /var/log/prepare-external-disk.log 2>&1
   fi
 
