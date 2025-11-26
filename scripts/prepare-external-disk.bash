@@ -1,6 +1,5 @@
 #!/bin/bash
 set -exo pipefail
-[[ ! $EUID -eq 0 ]] && echo "RUN AS ROOT!" && exit 1
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $SCRIPT_DIR
 . ./_helpers.bash
