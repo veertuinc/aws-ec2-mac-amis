@@ -88,9 +88,9 @@ else # ==================================================================
   eval "$(curl -s http://169.254.169.254/latest/user-data -H "X-aws-ec2-metadata-token: ${IMDS_TOKEN}" | grep "ANKA_" | grep -v "^#")" # eval needed to handle quotes wrapping ARGS ENV
   # pull latest scripts and restart script
   if [[ -n "${ANKA_PULL_LATEST_CLOUD_CONNECT}" ]]; then
-    sudo chown ec2-user:staff /Users/ec2-user/aws-ec2-mac-amis/.git/FETCH_HEAD || true
     git config --global --add safe.directory /Users/ec2-user/aws-ec2-mac-amis
     git fetch
+    sudo chown ec2-user:staff /Users/ec2-user/aws-ec2-mac-amis/.git/FETCH_HEAD || true
     if [[ ! $(git rev-parse HEAD) == $(git rev-parse @{u}) ]]; then # Ensure we don't restart the script if there aren't any changes.
       git pull
       echo "restarting script now that changes have been made"
@@ -104,6 +104,7 @@ else # ==================================================================
     if [[ ! -e ./$FULL_FILE_NAME ]]; then 
       curl -S -L -o ./$FULL_FILE_NAME https://veertu.com/downloads/anka-virtualization-latest
       sudo installer -pkg $FULL_FILE_NAME -tgt /
+      rm -f ./$FULL_FILE_NAME # cleanup to avoid root-owned files in repo dir
     fi
   fi
   if [[ -n "${ANKA_UPGRADE_CLI_TO_VERSION}" ]]; then
@@ -111,6 +112,7 @@ else # ==================================================================
     if [[ ! -e ./$FULL_FILE_NAME ]]; then 
       curl -S -L -o ./$FULL_FILE_NAME https://downloads.veertu.com/anka/$FULL_FILE_NAME
       sudo installer -pkg $FULL_FILE_NAME -tgt /
+      rm -f ./$FULL_FILE_NAME # cleanup to avoid root-owned files in repo dir
     fi
   fi
   if ${ANKA_ROUTE_METADATA_TO_VMS:-false}; then
@@ -196,6 +198,7 @@ else # ==================================================================
   if [[ "${CURRENT_CONTROLLER_VERSION}" -gt $(ankacluster --version | cut -d- -f1 | sed 's/\.//g') ]]; then
     do_curl -O ${ANKA_CONTROLLER_API_AUTH} "${ANKA_CONTROLLER_ADDRESS}/pkg/${AGENT_PKG_NAME}"
     installer -pkg ${AGENT_PKG_NAME} -tgt /
+    rm -f ${AGENT_PKG_NAME} # cleanup to avoid root-owned files in repo dir
   fi
 
   # Join arguments
