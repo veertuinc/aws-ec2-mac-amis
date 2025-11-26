@@ -99,6 +99,11 @@ else # ==================================================================
     fi
   fi
 
+  # prepare external disk plist
+  if [[ ! -e "${ANKA_PREPARE_EXTERNAL_DISK:-false}" ]]; then
+    /Users/ec2-user/aws-ec2-mac-amis/prepare-external-disk.bash > /var/log/prepare-external-disk.log 2>&1
+  fi
+
   # install latest anka CLI version
   if ${ANKA_UPGRADE_CLI_TO_LATEST:-false}; then
     FULL_FILE_NAME="$(curl -Ls -r 0-1 -o /dev/null -w %{url_effective} https://veertu.com/downloads/anka-virtualization-latest | cut -d/ -f5)"
