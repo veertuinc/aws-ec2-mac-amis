@@ -48,19 +48,19 @@ else
 			diskutil eraseDisk APFS "Anka" /dev/disk4
 		fi
 		diskutil list /dev/disk4
-		for u in root ec2-user; do
-			mkdir -p /Volumes/Anka/${u}/img_lib /Volumes/Anka/${u}/state_lib /Volumes/Anka/${u}/vm_lib/.locks
-			chown -R ${u} /Volumes/Anka/${u}
-			if [[ "${u}" == "root" ]]; then
-				anka config img_lib_dir "/Volumes/Anka/${u}/img_lib"
-				anka config state_lib_dir "/Volumes/Anka/${u}/state_lib"
-				anka config vm_lib_dir "/Volumes/Anka/${u}/vm_lib"
-				anka config vm_lock_dir "/Volumes/Anka/${u}/vm_lib/.locks"
+		for username in root ec2-user; do
+			mkdir -p /Volumes/Anka/${username}/img_lib /Volumes/Anka/${username}/state_lib /Volumes/Anka/${username}/vm_lib/.locks
+			chown -R ${username} /Volumes/Anka/${username}
+			if [[ "${username}" == "root" ]]; then
+				anka config img_lib_dir "/Volumes/Anka/${username}/img_lib"
+				anka config state_lib_dir "/Volumes/Anka/${username}/state_lib"
+				anka config vm_lib_dir "/Volumes/Anka/${username}/vm_lib"
+				anka config vm_lock_dir "/Volumes/Anka/${username}/vm_lib/.locks"
 			else
-				sudo -u ${u} anka config img_lib_dir "/Volumes/Anka/${u}/img_lib"
-				sudo -u ${u} anka config state_lib_dir "/Volumes/Anka/${u}/state_lib"
-				sudo -u ${u} anka config vm_lib_dir "/Volumes/Anka/${u}/vm_lib"
-				sudo -u ${u} anka config vm_lock_dir "/Volumes/Anka/${u}/vm_lib/.locks"
+				sudo -ui ${username} anka config img_lib_dir "/Volumes/Anka/${username}/img_lib"
+				sudo -ui ${username} anka config state_lib_dir "/Volumes/Anka/${username}/state_lib"
+				sudo -ui ${username} anka config vm_lib_dir "/Volumes/Anka/${username}/vm_lib"
+				sudo -ui ${username} anka config vm_lock_dir "/Volumes/Anka/${username}/vm_lib/.locks"
 			fi
 		done
 	fi
