@@ -47,6 +47,7 @@ else
 		if ! diskutil list /dev/disk4 | grep -q disk4s1; then
 			diskutil eraseDisk APFS "Anka" /dev/disk4
 		fi
+		diskutil list /dev/disk4
 		for u in root ec2-user; do
 			mkdir -p /Volumes/Anka/${u}/img_lib /Volumes/Anka/${u}/state_lib /Volumes/Anka/${u}/vm_lib/.locks
 			chown -R ${u} /Volumes/Anka/${u}
