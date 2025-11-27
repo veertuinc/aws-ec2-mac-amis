@@ -8,7 +8,7 @@ if diskutil list /dev/disk4; then
 		diskutil eraseDisk APFS "Anka" /dev/disk4
 		sudo diskutil enableOwnership /Volumes/Anka
 		sudo diskutil unmount /Volumes/Anka
-		sudo diskutil mount /Volumes/Anka
+		sudo diskutil mountDisk /dev/disk4
 	fi
 	diskutil list /dev/disk4
 	for username in ec2-user root; do
