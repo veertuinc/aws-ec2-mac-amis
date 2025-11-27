@@ -4,13 +4,13 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $SCRIPT_DIR
 . ../_helpers.bash
 if diskutil list /dev/disk4; then
-	# Get the APFS container reference
-	APFS_CONTAINER=$(diskutil list /dev/disk4 | grep "Apple_APFS Container" | awk '{print $NF}' | sed 's/s[0-9]*$//')
+	# Get the APFS container reference (use || true to avoid pipefail exit on no match)
+	APFS_CONTAINER=$(diskutil list /dev/disk4 | grep "Apple_APFS Container" | awk '{print $NF}' | sed 's/s[0-9]*$//' || true)
 	
 	if [[ -z "$APFS_CONTAINER" ]]; then
 		# No APFS container yet, create one
 		diskutil eraseDisk APFS "Anka" /dev/disk4
-		APFS_CONTAINER=$(diskutil list /dev/disk4 | grep "Apple_APFS Container" | awk '{print $NF}' | sed 's/s[0-9]*$//')
+		APFS_CONTAINER=$(diskutil list /dev/disk4 | grep "Apple_APFS Container" | awk '{print $NF}' | sed 's/s[0-9]*$//' || true)
 	fi
 	
 	diskutil list /dev/disk4
