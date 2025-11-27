@@ -150,11 +150,6 @@ else # ==================================================================
     eval "${ANKA_POST_LICENSE_ACTIVATE_COMMANDS}"
   fi
 
-  # prepare external disk plist
-  if [[ "${ANKA_PREPARE_EXTERNAL_DISK:-false}" == "true" ]]; then
-   sudo /Users/ec2-user/aws-ec2-mac-amis/scripts/prepare-external-disk.bash >> /var/log/prepare-external-disk.log 2>&1 || true
-  fi
-
   # run scripts (supports ANKA_EXECUTE_SCRIPT and ANKA_EXECUTE_SCRIPT_1, _2, etc.)
   if [[ -n "${ANKA_EXECUTE_SCRIPT}" ]]; then
     ./scripts/${ANKA_EXECUTE_SCRIPT} > /var/log/execute-script.log 2>&1 || true
