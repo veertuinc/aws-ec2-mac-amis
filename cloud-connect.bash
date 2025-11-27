@@ -152,7 +152,7 @@ else # ==================================================================
 
   # prepare external disk plist
   if [[ "${ANKA_PREPARE_EXTERNAL_DISK:-false}" == "true" ]]; then
-    /Users/ec2-user/aws-ec2-mac-amis/scripts/prepare-external-disk.bash >> /var/log/prepare-external-disk.log 2>&1 || true
+   sudo /Users/ec2-user/aws-ec2-mac-amis/scripts/prepare-external-disk.bash >> /var/log/prepare-external-disk.log 2>&1 || true
   fi
 
   # run scripts (supports ANKA_EXECUTE_SCRIPT and ANKA_EXECUTE_SCRIPT_1, _2, etc.)
