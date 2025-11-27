@@ -6,7 +6,7 @@ cd $SCRIPT_DIR
 if diskutil list /dev/disk4; then
 	if ! diskutil list /dev/disk4 | grep -q "Apple_APFS Container"; then
 		diskutil eraseDisk APFS "Anka" /dev/disk4
-		sudo diskutil enableOwnership /Volumes/Anka
+		# sudo diskutil enableOwnership /Volumes/Anka
 		# Wait for volume to be fully ready for writes
 		sleep 5
 	fi
@@ -14,8 +14,6 @@ if diskutil list /dev/disk4; then
 	for username in ec2-user root; do
 		[[ "${username}" == "root" ]] && SUDO="sudo" || SUDO=""
 		# Always use sudo for mkdir since volume root is owned by root:wheel
-		sudo mkdir -p /Volumes/Anka/${username}/img_lib /Volumes/Anka/${username}/state_lib /Volumes/Anka/${username}/vm_lib/.locks || true
-
 		sudo mkdir -p /Volumes/Anka/${username}/img_lib /Volumes/Anka/${username}/state_lib /Volumes/Anka/${username}/vm_lib/.locks
 		sudo chown -R ${username} /Volumes/Anka/${username}
 		# Run anka config as the target user
