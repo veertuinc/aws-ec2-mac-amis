@@ -10,7 +10,7 @@ if diskutil list /dev/disk4; then
 		sudo chown -R ec2-user /Volumes/Anka
 	fi
 	diskutil list /dev/disk4
-	for username in root ec2-user; do
+	for username in ec2-user root; do
 		[[ "${username}" == "root" ]] && SUDO="sudo" || SUDO=""
 		${SUDO} mkdir -p /Volumes/Anka/${username}/img_lib /Volumes/Anka/${username}/state_lib /Volumes/Anka/${username}/vm_lib/.locks
 		${SUDO} chown -R ${username} /Volumes/Anka/${username}
