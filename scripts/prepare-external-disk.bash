@@ -7,6 +7,8 @@ if diskutil list /dev/disk4; then
 	if ! diskutil list /dev/disk4 | grep -q "Apple_APFS Container"; then
 		diskutil eraseDisk APFS "Anka" /dev/disk4
 		sudo diskutil enableOwnership /Volumes/Anka
+		# Wait for volume to be fully ready for writes
+		sleep 5
 	fi
 	diskutil list /dev/disk4
 	for username in ec2-user root; do
