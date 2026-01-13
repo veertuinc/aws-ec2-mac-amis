@@ -34,14 +34,12 @@ else
 fi
 
 diskutil list /dev/disk4
-if [[ -d /Volumes/Anka/root/img_lib ]]; then
-    echo "Anka volumes already created, exiting"
-    exit 0
-fi
 for username in root ec2-user; do
     echo "Preparing ${username}..."
     [[ "${username}" != "root" ]] && USER_SWITCH="sudo -u ${username}"
-    mkdir -p /Volumes/Anka/${username}/img_lib /Volumes/Anka/${username}/state_lib /Volumes/Anka/${username}/vm_lib/.locks
+    if [[ ! -d /Volumes/Anka/${username}/img_lib || ! -d /Volumes/Anka/${username}/state_lib || ! -d /Volumes/Anka/${username}/vm_lib/.locks ]]; then
+        mkdir -p /Volumes/Anka/${username}/img_lib /Volumes/Anka/${username}/state_lib /Volumes/Anka/${username}/vm_lib/.locks
+    fi
     chown -R ${username} /Volumes/Anka/${username}
     ${USER_SWITCH} anka config img_lib_dir "/Volumes/Anka/${username}/img_lib"
     ${USER_SWITCH} anka config state_lib_dir "/Volumes/Anka/${username}/state_lib"
