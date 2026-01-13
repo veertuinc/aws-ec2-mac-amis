@@ -28,12 +28,16 @@ fi
 if diskutil list /dev/disk4 | grep -q disk4s1; then
     echo "Disk already formatted, mounting and exiting"
     diskutil mountDisk /dev/disk4
-    exit 0
+else
+    echo "Disk not formatted, formatting and exiting"
+    diskutil eraseDisk APFS "Anka" /dev/disk4
 fi
 
-diskutil eraseDisk APFS "Anka" /dev/disk4
-
 diskutil list /dev/disk4
+if [[ -d /Volumes/Anka/root/img_lib ]]; then
+    echo "Anka volumes already created, exiting"
+    exit 0
+fi
 for username in root ec2-user; do
     echo "Preparing ${username}..."
     [[ "${username}" != "root" ]] && USER_SWITCH="sudo -u ${username}"
