@@ -14,7 +14,7 @@ set -exo pipefail
 
 [[ ! $EUID -eq 0 ]] && echo "RUN AS ROOT!" && exit 1
 
-tee /usr/local/bin/prepare-local-disk >/dev/null <<'EOF'
+cat > /usr/local/bin/prepare-local-disk <<'EOF'
 #!/bin/bash
 set -exo pipefail
 
@@ -49,7 +49,7 @@ done
 EOF
 
 chmod +x /usr/local/bin/prepare-local-disk
-tee -a /usr/local/aws/ec2-macos-init/init.toml >/dev/null <<'EOF'
+cat >> /usr/local/aws/ec2-macos-init/init.toml <<'EOF'
 
 [[Module]]
     Name = "PrepareLocalDisk"
