@@ -26,10 +26,10 @@ if ! diskutil info /dev/disk4 &>/dev/null; then
 fi
 
 if diskutil list /dev/disk4 | grep -q disk4s1; then
-    echo "Disk already formatted, mounting and exiting"
+    echo "Disk already formatted, mounting"
     diskutil mountDisk /dev/disk4
 else
-    echo "Disk not formatted, formatting and exiting"
+    echo "Disk not formatted, formatting"
     diskutil eraseDisk APFS "Anka" /dev/disk4
 fi
 
