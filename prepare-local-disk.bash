@@ -25,13 +25,15 @@ if ! diskutil info /dev/disk4 &>/dev/null; then
     exit 1
 fi
 
-if diskutil list /dev/disk4 | grep -q disk4s1; then
-    echo "Disk already formatted, mounting"
-    diskutil mountDisk /dev/disk4
-else
-    echo "Disk not formatted, formatting"
-    diskutil eraseDisk APFS "Anka" /dev/disk4
+# Check if already mounted as Anka
+if mount | grep -q "/Volumes/Anka"; then
+    echo "Disk already mounted as /Volumes/Anka, nothing to do"
+    exit 0
 fi
+
+# Disk exists but not mounted as Anka - erase and format (handles ephemeral0 case)
+echo "Formatting disk as Anka..."
+diskutil eraseDisk APFS "Anka" /dev/disk4
 
 diskutil list /dev/disk4
 for username in root ec2-user; do
