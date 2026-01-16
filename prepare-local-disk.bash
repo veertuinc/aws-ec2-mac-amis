@@ -20,8 +20,21 @@ set -exo pipefail
 
 diskutil list
 
-if ! diskutil info /dev/disk4 &>/dev/null; then
-    echo "Disk /dev/disk4 does not exist. Exiting."
+PDISK=$(
+    diskutil list physical external | awk '/^\/dev\/disk/ {print $1}' | while read -r disk; do
+        apfs_container=$(diskutil list "${disk}" | awk '/Apple_APFS/ {print $NF; exit}')
+        if [[ -n "${apfs_container}" ]]; then
+            if diskutil apfs list "${apfs_container}" | grep -q "Macintosh HD"; then
+                continue
+            fi
+        fi
+        echo "${disk}"
+        break
+    done
+)
+
+if [[ -z "${PDISK}" || ! -e "${PDISK}" ]]; then
+    echo "External non-EFI disk not found. Exiting."
     exit 1
 fi
 
@@ -33,9 +46,9 @@ fi
 
 # Disk exists but not mounted as Anka - erase and format (handles ephemeral0 case)
 echo "Formatting disk as Anka..."
-diskutil eraseDisk APFS "Anka" /dev/disk4
+diskutil eraseDisk APFS "Anka" "${PDISK}"
 
-diskutil list /dev/disk4
+diskutil list "${PDISK}"
 for username in root ec2-user; do
     echo "Preparing ${username}..."
     [[ "${username}" != "root" ]] && USER_SWITCH="sudo -u ${username}"
