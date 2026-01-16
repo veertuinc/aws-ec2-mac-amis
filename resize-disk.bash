@@ -39,7 +39,7 @@ EOD
 launchctl load -w "${RESIZE_DISK_PLIST_PATH}"
 else
 	# Looks like AWS provides a resize tool now.
-	ec2-macos-utils grow --id root --verbose
+	/usr/local/bin/ec2-macos-utils grow --id root --verbose
 #   # Modify the disk
 #   PDISK=$(
 #     diskutil list physical external | awk '/^\/dev\/disk/ {print $1}' | while read -r disk; do
