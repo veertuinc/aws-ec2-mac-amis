@@ -20,6 +20,7 @@ set -exo pipefail
 
 date
 ls -laht /Volumes/ephemeral0/ || true
+ls -laht /Volumes/Anka/ || true
 
 diskutil list
 
