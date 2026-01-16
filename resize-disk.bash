@@ -38,16 +38,18 @@ cat > "${RESIZE_DISK_PLIST_PATH}" <<EOD
 EOD
 launchctl load -w "${RESIZE_DISK_PLIST_PATH}"
 else
-  # Modify the disk
-  PDISK=$(
-    diskutil list physical external | awk '/^\/dev\/disk/ {print $1}' | while read -r disk; do
-      if diskutil list "${disk}" | awk '$2=="EFI" {found=1} END {exit found ? 0 : 1}'; then
-        echo "${disk}"
-        break
-      fi
-    done
-  )
-  APFSCONT=$(diskutil list "${PDISK}" | awk '/Apple_APFS/ {print $NF; exit}')
-  echo "y" | diskutil repairDisk $PDISK
-  diskutil apfs resizeContainer $APFSCONT 0
+	# Looks like AWS provides a resize tool now.
+	ec2-macos-utils grow --id root --verbose
+#   # Modify the disk
+#   PDISK=$(
+#     diskutil list physical external | awk '/^\/dev\/disk/ {print $1}' | while read -r disk; do
+#       if diskutil list "${disk}" | awk '$2=="EFI" {found=1} END {exit found ? 0 : 1}'; then
+#         echo "${disk}"
+#         break
+#       fi
+#     done
+#   )
+#   APFSCONT=$(diskutil list "${PDISK}" | awk '/Apple_APFS/ {print $NF; exit}')
+#   echo "y" | diskutil repairDisk $PDISK
+#   diskutil apfs resizeContainer $APFSCONT 0
 fi
