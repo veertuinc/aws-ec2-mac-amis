@@ -109,7 +109,7 @@ cat >> /usr/local/aws/ec2-macos-init/init.toml <<'EOF'
     RunPerBoot = true # Run every boot
     FatalOnError = false # Best effort, don't fatal on error
     [Module.Command]
-        Cmd = ["/bin/zsh", "-c", "sudo /usr/local/bin/prepare-local-disk | sudo tee -a /var/log/prepare-local-disk.log"]
+        Cmd = ["/bin/zsh", "-c", "sudo /usr/local/bin/prepare-local-disk 2>&1 | sudo tee -a /var/log/prepare-local-disk.log"]
 
 EOF
 
