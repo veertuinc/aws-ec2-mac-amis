@@ -18,6 +18,8 @@ cat > /usr/local/bin/prepare-local-disk <<'EOF'
 #!/bin/bash
 set -exo pipefail
 
+date
+
 diskutil list
 
 EXTERNAL_DEVICE=$(
