@@ -77,6 +77,7 @@ if [[ -n "${apfs_store}" ]]; then
         exit 1
     fi
     diskutil apfs deleteContainer "${apfs_container}" || true
+    sudo dd if=/dev/zero of=${EXTERNAL_DEVICE} bs=1m count=10 || true
 fi
 
 echo "Formatting disk as Anka..."
