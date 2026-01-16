@@ -19,6 +19,7 @@ cat > /usr/local/bin/prepare-local-disk <<'EOF'
 set -exo pipefail
 
 date
+ls -laht /Volumes/ephemeral0/ || true
 
 diskutil list
 
