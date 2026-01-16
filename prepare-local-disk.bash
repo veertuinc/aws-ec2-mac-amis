@@ -54,7 +54,7 @@ fi
 wait_start=$(date +%s)
 while ! mount | grep -q "/Volumes/ephemeral0"; do
     now=$(date +%s)
-    if (( now - wait_start >= 300 )); then
+    if (( now - wait_start >= 160 )); then
         echo "Timeout waiting for /Volumes/ephemeral0; proceeding with erase"
         break
     fi
