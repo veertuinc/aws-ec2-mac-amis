@@ -91,6 +91,7 @@ echo "Formatting disk as Anka..."
 diskutil eraseDisk APFS "Anka" "${EXTERNAL_DEVICE}"
 
 diskutil list "${EXTERNAL_DEVICE}"
+sudo diskutil enableOwnership /Volumes/Anka
 for username in root ec2-user; do
     echo "Preparing ${username}..."
     USER_SWITCH=""
