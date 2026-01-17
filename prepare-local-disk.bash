@@ -93,15 +93,16 @@ diskutil eraseDisk APFS "Anka" "${EXTERNAL_DEVICE}"
 diskutil list "${EXTERNAL_DEVICE}"
 for username in root ec2-user; do
     echo "Preparing ${username}..."
-    [[ "${username}" != "root" ]] && USER_SWITCH="sudo -u ${username}"
+    USER_SWITCH=""
+    [[ "${username}" != "root" ]] && USER_SWITCH="sudo -u ${username} -H"
     if [[ ! -d /Volumes/Anka/${username}/img_lib || ! -d /Volumes/Anka/${username}/state_lib || ! -d /Volumes/Anka/${username}/vm_lib/.locks ]]; then
         mkdir -p /Volumes/Anka/${username}/img_lib /Volumes/Anka/${username}/state_lib /Volumes/Anka/${username}/vm_lib/.locks
     fi
     chown -R ${username} /Volumes/Anka/${username}
-    ${USER_SWITCH} anka config img_lib_dir "/Volumes/Anka/${username}/img_lib"
-    ${USER_SWITCH} anka config state_lib_dir "/Volumes/Anka/${username}/state_lib"
-    ${USER_SWITCH} anka config vm_lib_dir "/Volumes/Anka/${username}/vm_lib"
-    ${USER_SWITCH} anka config vm_lock_dir "/Volumes/Anka/${username}/vm_lib/.locks"
+    ${USER_SWITCH} anka config img_lib_dir "/Volumes/Anka/${username}/img_lib" </dev/null
+    ${USER_SWITCH} anka config state_lib_dir "/Volumes/Anka/${username}/state_lib" </dev/null
+    ${USER_SWITCH} anka config vm_lib_dir "/Volumes/Anka/${username}/vm_lib" </dev/null
+    ${USER_SWITCH} anka config vm_lock_dir "/Volumes/Anka/${username}/vm_lib/.locks" </dev/null
 done
 EOF
 
