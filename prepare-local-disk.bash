@@ -19,6 +19,9 @@ cat > /usr/local/bin/prepare-local-disk <<'EOF'
 set -exo pipefail
 
 date
+
+sleep 10
+
 ls -laht /Volumes/ephemeral0/ || true
 ls -laht /Volumes/Anka/ || true
 
@@ -107,7 +110,7 @@ cat >> /usr/local/aws/ec2-macos-init/init.toml <<'EOF'
 
 [[Module]]
     Name = "PrepareLocalDisk"
-    PriorityGroup = 4
+    PriorityGroup = 5
     RunPerBoot = true # Run every boot
     FatalOnError = false # Best effort, don't fatal on error
     [Module.Command]
