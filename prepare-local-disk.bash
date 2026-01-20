@@ -27,6 +27,20 @@ ls -laht /Volumes/Anka/ || true
 
 diskutil list
 
+post-run() {
+    # safety sleep
+    sleep 10
+
+    # disable spotlight indexing on /Volumes/Anka
+    mdutil -a -i off /Volumes/Anka || true
+
+    ls -laht /Volumes/ephemeral0/ || true
+    ls -laht /Volumes/Anka/ || true
+
+    diskutil list
+}
+trap post-run EXIT
+
 EXTERNAL_DEVICE=$(
     diskutil list physical external | awk '/^\/dev\/disk/ {print $1}' | while read -r disk; do
         apfs_store=$(diskutil list "${disk}" | awk '/Apple_APFS/ {print $NF; exit}')
@@ -106,8 +120,6 @@ for username in root ec2-user; do
     ${USER_SWITCH} anka config vm_lock_dir "/Volumes/Anka/${username}/vm_lib/.locks" </dev/null
 done
 
-# disable spotlight indexing on /Volumes/Anka
-mdutil -a -i off /Volumes/Anka
 EOF
 
 chmod +x /usr/local/bin/prepare-local-disk
