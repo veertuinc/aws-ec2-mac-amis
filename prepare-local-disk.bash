@@ -105,6 +105,9 @@ for username in root ec2-user; do
     ${USER_SWITCH} anka config vm_lib_dir "/Volumes/Anka/${username}/vm_lib" </dev/null
     ${USER_SWITCH} anka config vm_lock_dir "/Volumes/Anka/${username}/vm_lib/.locks" </dev/null
 done
+
+# disable spotlight indexing on /Volumes/Anka
+mdutil -a -i off /Volumes/Anka
 EOF
 
 chmod +x /usr/local/bin/prepare-local-disk
