@@ -61,7 +61,7 @@ fi
 # Check if already mounted as Anka
 if mount | grep -q "/Volumes/Anka"; then
     echo "Disk already mounted as /Volumes/Anka, nothing to do"
-    exit 0
+    exit 1
 fi
 
 # Disk exists but not mounted as Anka - erase and format (handles ephemeral0 case)
