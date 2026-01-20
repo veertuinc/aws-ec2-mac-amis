@@ -40,11 +40,7 @@ post-run() {
 }
 trap post-run EXIT
 
-EXTERNAL_DEVICE=$(
-    /usr/local/libexec/GetInstanceStorageDisk.swift 2>/dev/null \
-        || /usr/bin/swift /usr/local/libexec/GetInstanceStorageDisk.swift 2>/dev/null \
-        || true
-)
+EXTERNAL_DEVICE="$(/usr/local/libexec/GetInstanceStorageDisk.swift)"
 
 if [[ -z "${EXTERNAL_DEVICE}" || "${EXTERNAL_DEVICE}" != /dev/disk* || ! -e "${EXTERNAL_DEVICE}" ]]; then
     echo "Instance storage disk not found via GetInstanceStorageDisk.swift. Exiting."
