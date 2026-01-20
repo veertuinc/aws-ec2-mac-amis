@@ -40,12 +40,35 @@ post-run() {
     diskutil list
 }
 
-EXTERNAL_DEVICE="$(/usr/local/libexec/GetInstanceStorageDisk.swift || true)" # always exits 1, even if found
-
+EXTERNAL_DEVICE=$(
+    diskutil list physical external | awk '/^\/dev\/disk/ {print $1}' | while read -r disk; do
+        apfs_store=$(diskutil list "${disk}" | awk '/Apple_APFS/ {print $NF; exit}')
+        if [[ -n "${apfs_store}" ]]; then
+            apfs_container=$(diskutil apfs list | awk -v store="${apfs_store}" '
+                /APFS Container Reference:/ {ref=$NF}
+                /Physical Store/ && $NF==store {print ref; exit}
+            ')
+            if [[ -n "${apfs_container}" ]]; then
+                if diskutil apfs list "${apfs_container}" | grep -q "Macintosh HD"; then
+                    continue
+                fi
+            fi
+        fi
+        echo "${disk}"
+        break
+    done
+)
 if [[ -z "${EXTERNAL_DEVICE}" || "${EXTERNAL_DEVICE}" != /dev/disk* || ! -e "${EXTERNAL_DEVICE}" ]]; then
-    echo "Instance storage disk not found via GetInstanceStorageDisk.swift. Exiting."
+    echo "Instance storage disk not found via diskutil list physical external. Exiting."
     exit 1
 fi
+
+# removed because it takes 2 minutes to run the first time we start an instance.
+# EXTERNAL_DEVICE="$(/usr/local/libexec/GetInstanceStorageDisk.swift || true)" # always exits 1, even if found
+# if [[ -z "${EXTERNAL_DEVICE}" || "${EXTERNAL_DEVICE}" != /dev/disk* || ! -e "${EXTERNAL_DEVICE}" ]]; then
+#     echo "Instance storage disk not found via GetInstanceStorageDisk.swift. Exiting."
+#     exit 1
+# fi
 
 # Check if already mounted as Anka
 if mount | grep -q "/Volumes/Anka"; then
