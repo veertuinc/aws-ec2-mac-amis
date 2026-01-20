@@ -18,13 +18,12 @@ cat > /usr/local/bin/prepare-local-disk <<'EOF'
 #!/bin/bash
 set -exo pipefail
 
+echo "================================"
+echo "] Starting prepare-local-disk..."
 date
-
 sleep 10
-
 ls -laht /Volumes/ephemeral0/ || true
 ls -laht /Volumes/Anka/ || true
-
 diskutil list
 
 post-run() {
@@ -42,27 +41,24 @@ post-run() {
 trap post-run EXIT
 
 EXTERNAL_DEVICE=$(
-    diskutil list physical external | awk '/^\/dev\/disk/ {print $1}' | while read -r disk; do
-        apfs_store=$(diskutil list "${disk}" | awk '/Apple_APFS/ {print $NF; exit}')
-        if [[ -n "${apfs_store}" ]]; then
-            apfs_container=$(diskutil apfs list | awk -v store="${apfs_store}" '
-                /APFS Container Reference:/ {ref=$NF}
-                /Physical Store/ && $NF==store {print ref; exit}
-            ')
-            if [[ -n "${apfs_container}" ]]; then
-                if diskutil apfs list "${apfs_container}" | grep -q "Macintosh HD"; then
-                    continue
-                fi
-            fi
-        fi
-        echo "${disk}"
-        break
-    done
+    /usr/local/libexec/GetInstanceStorageDisk.swift 2>/dev/null \
+        || /usr/bin/swift /usr/local/libexec/GetInstanceStorageDisk.swift 2>/dev/null \
+        || true
 )
 
-if [[ -z "${EXTERNAL_DEVICE}" || ! -e "${EXTERNAL_DEVICE}" ]]; then
-    echo "External non-EFI disk not found. Exiting."
+if [[ -z "${EXTERNAL_DEVICE}" || "${EXTERNAL_DEVICE}" != /dev/disk* || ! -e "${EXTERNAL_DEVICE}" ]]; then
+    echo "Instance storage disk not found via GetInstanceStorageDisk.swift. Exiting."
     exit 1
+fi
+
+# Check for the amazon script that mounts the instance storage disk as /Volumes/ephemeral0
+LAUNCHCTL_RESULT=$(launchctl list | grep "com.amazon.ec2.instance-storage-disk-mounter" || true)
+if [[ -n "${LAUNCHCTL_RESULT}" ]]; then
+    echo "Found amazon script that mounts the instance storage disk as /Volumes/ephemeral0, unloading..."
+    launchctl unload -w /Library/LaunchDaemons/com.amazon.ec2.instance-storage-disk-mounter.plist
+    echo "Amazon script that mounts the instance storage disk as /Volumes/ephemeral0 unloaded."
+else
+    echo "Amazon script that mounts the instance storage disk as /Volumes/ephemeral0 not found, nothing to do."
 fi
 
 # Check if already mounted as Anka
@@ -102,7 +98,7 @@ if [[ -n "${apfs_store}" ]]; then
 fi
 
 echo "Formatting disk as Anka..."
-diskutil eraseDisk APFS "Anka" "${EXTERNAL_DEVICE}"
+diskutil eraseDisk -noEFI APFS "Anka" GPT "${EXTERNAL_DEVICE}"
 
 diskutil list "${EXTERNAL_DEVICE}"
 sudo diskutil enableOwnership /Volumes/Anka
