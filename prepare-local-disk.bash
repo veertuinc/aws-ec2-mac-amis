@@ -55,7 +55,7 @@ if [[ -n "${LAUNCHCTL_RESULT}" ]]; then
     launchctl unload -w /Library/LaunchDaemons/com.amazon.ec2.instance-storage-disk-mounter.plist
     echo "Amazon script that mounts the instance storage disk as /Volumes/ephemeral0 unloaded."
 else
-    echo "Amazon script that mounts the instance storage disk as /Volumes/ephemeral0 not found, nothing to do."
+    echo "Amazon script that mounts the instance storage disk as /Volumes/ephemeral0 not found (a good thing)."
 fi
 
 # Check if already mounted as Anka
