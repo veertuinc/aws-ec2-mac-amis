@@ -39,7 +39,6 @@ post-run() {
 
     diskutil list
 }
-trap post-run EXIT
 
 EXTERNAL_DEVICE="$(/usr/local/libexec/GetInstanceStorageDisk.swift || true)" # always exits 1, even if found
 
@@ -84,6 +83,8 @@ if [[ -n "${LAUNCHCTL_RESULT}" ]]; then
 else
     echo "Amazon script that mounts the instance storage disk as /Volumes/ephemeral0 not found (a good thing)."
 fi
+
+trap post-run EXIT
 
 echo "Formatting disk as Anka..."
 diskutil eraseDisk -noEFI APFS "Anka" GPT "${EXTERNAL_DEVICE}"
