@@ -48,50 +48,50 @@ if [[ -z "${EXTERNAL_DEVICE}" || "${EXTERNAL_DEVICE}" != /dev/disk* || ! -e "${E
     exit 1
 fi
 
-# Check for the amazon script that mounts the instance storage disk as /Volumes/ephemeral0
-LAUNCHCTL_RESULT=$(launchctl list | grep "com.amazon.ec2.instance-storage-disk-mounter" || true)
-if [[ -n "${LAUNCHCTL_RESULT}" ]]; then
-    echo "Found amazon script that mounts the instance storage disk as /Volumes/ephemeral0, unloading..."
-    launchctl unload -w /Library/LaunchDaemons/com.amazon.ec2.instance-storage-disk-mounter.plist
-    echo "Amazon script that mounts the instance storage disk as /Volumes/ephemeral0 unloaded."
-else
-    echo "Amazon script that mounts the instance storage disk as /Volumes/ephemeral0 not found (a good thing)."
-fi
-
 # Check if already mounted as Anka
 if mount | grep -q "/Volumes/Anka"; then
     echo "Disk already mounted as /Volumes/Anka, nothing to do"
     exit 1
 fi
 
-# Disk exists but not mounted as Anka - erase and format (handles ephemeral0 case)
-wait_start=$(date +%s)
-while ! mount | grep -q "/Volumes/ephemeral0"; do
-    now=$(date +%s)
-    if (( now - wait_start >= 160 )); then
-        echo "Timeout waiting for /Volumes/ephemeral0; proceeding with erase"
-        break
-    fi
-    echo "Waiting for /Volumes/ephemeral0 to mount before we continue creating /Volumes/Anka..."
-    sleep 5
-done
+# Check for the amazon script that mounts the instance storage disk as /Volumes/ephemeral0
+LAUNCHCTL_RESULT=$(launchctl list | grep "com.amazon.ec2.instance-storage-disk-mounter" || true)
+if [[ -n "${LAUNCHCTL_RESULT}" ]]; then
+    echo "Found amazon script that mounts the instance storage disk as /Volumes/ephemeral0, unloading..."
+    launchctl unload -w /Library/LaunchDaemons/com.amazon.ec2.instance-storage-disk-mounter.plist
+    echo "Amazon script that mounts the instance storage disk as /Volumes/ephemeral0 unloaded."
 
-apfs_store=$(diskutil list "${EXTERNAL_DEVICE}" | awk '/Apple_APFS/ {print $NF; exit}')
-if [[ -n "${apfs_store}" ]]; then
-    apfs_container=$(diskutil apfs list | awk -v store="${apfs_store}" '
-        /APFS Container Reference:/ {ref=$NF}
-        /Physical Store/ && $NF==store {print ref; exit}
-    ')
-    if [[ -z "${apfs_container}" ]]; then
-        echo "Could not find APFS container for ${apfs_store}; refusing to delete."
-        exit 1
+    # Disk exists but not mounted as Anka - erase and format (handles ephemeral0 case)
+    wait_start=$(date +%s)
+    while ! mount | grep -q "/Volumes/ephemeral0"; do
+        now=$(date +%s)
+        if (( now - wait_start >= 160 )); then
+            echo "Timeout waiting for /Volumes/ephemeral0; proceeding with erase"
+            break
+        fi
+        echo "Waiting for /Volumes/ephemeral0 to mount before we continue creating /Volumes/Anka..."
+        sleep 5
+    done
+
+    apfs_store=$(diskutil list "${EXTERNAL_DEVICE}" | awk '/Apple_APFS/ {print $NF; exit}')
+    if [[ -n "${apfs_store}" ]]; then
+        apfs_container=$(diskutil apfs list | awk -v store="${apfs_store}" '
+            /APFS Container Reference:/ {ref=$NF}
+            /Physical Store/ && $NF==store {print ref; exit}
+        ')
+        if [[ -z "${apfs_container}" ]]; then
+            echo "Could not find APFS container for ${apfs_store}; refusing to delete."
+            exit 1
+        fi
+        if ! diskutil apfs list "${apfs_container}" | grep -q "ephemeral0"; then
+            echo "APFS container is not ephemeral0; refusing to delete. If you're using some sort of special setup for the external disk, this script will not work."
+            exit 1
+        fi
+        diskutil apfs deleteContainer "${apfs_container}" || true
+        sudo dd if=/dev/zero of=${EXTERNAL_DEVICE} bs=1m count=10 || true
     fi
-    if ! diskutil apfs list "${apfs_container}" | grep -q "ephemeral0"; then
-        echo "APFS container is not ephemeral0; refusing to delete. If you're using some sort of special setup for the external disk, this script will not work."
-        exit 1
-    fi
-    diskutil apfs deleteContainer "${apfs_container}" || true
-    sudo dd if=/dev/zero of=${EXTERNAL_DEVICE} bs=1m count=10 || true
+else
+    echo "Amazon script that mounts the instance storage disk as /Volumes/ephemeral0 not found (a good thing)."
 fi
 
 echo "Formatting disk as Anka..."
