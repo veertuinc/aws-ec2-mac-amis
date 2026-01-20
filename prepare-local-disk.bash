@@ -16,12 +16,13 @@ set -exo pipefail
 
 cat > /usr/local/bin/prepare-local-disk <<'EOF'
 #!/bin/bash
-set -exo pipefail
+set -eo pipefail
 
 echo "================================"
 echo "] Starting prepare-local-disk..."
 date
 sleep 10
+set -x
 ls -laht /Volumes/ephemeral0/ || true
 ls -laht /Volumes/Anka/ || true
 diskutil list
@@ -40,7 +41,7 @@ post-run() {
 }
 trap post-run EXIT
 
-EXTERNAL_DEVICE="$(/usr/local/libexec/GetInstanceStorageDisk.swift)"
+EXTERNAL_DEVICE="$(/usr/local/libexec/GetInstanceStorageDisk.swift || true)"
 
 if [[ -z "${EXTERNAL_DEVICE}" || "${EXTERNAL_DEVICE}" != /dev/disk* || ! -e "${EXTERNAL_DEVICE}" ]]; then
     echo "Instance storage disk not found via GetInstanceStorageDisk.swift. Exiting."
