@@ -116,7 +116,8 @@ done
 EOF
 
 chmod +x /usr/local/bin/prepare-local-disk
-cat >> /usr/local/aws/ec2-macos-init/init.toml <<'EOF'
+if /usr/local/bin/prepare-local-disk; then
+  cat >> /usr/local/aws/ec2-macos-init/init.toml <<'EOF'
 
 [[Module]]
     Name = "PrepareLocalDisk"
@@ -127,5 +128,7 @@ cat >> /usr/local/aws/ec2-macos-init/init.toml <<'EOF'
         Cmd = ["/bin/zsh", "-c", "sudo /usr/local/bin/prepare-local-disk 2>&1 | sudo tee -a /var/log/prepare-local-disk.log"]
 
 EOF
-
-/usr/local/bin/prepare-local-disk
+else
+  echo "prepare-local-disk failed; not installing init module."
+  exit 1
+fi
