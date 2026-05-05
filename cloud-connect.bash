@@ -80,6 +80,7 @@ else # ==================================================================
     -z "$(curl -s http://169.254.169.254/latest/user-data -H "X-aws-ec2-metadata-token: ${IMDS_TOKEN}" | grep "ANKA_")" 
   ]]; then
     echo "Could not find any user-data for instance..."
+    sleep 60
     disjoin || true
     exit
   fi
