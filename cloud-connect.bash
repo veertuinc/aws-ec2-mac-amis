@@ -80,7 +80,16 @@ else # ==================================================================
     -z "$(curl -s http://169.254.169.254/latest/user-data -H "X-aws-ec2-metadata-token: ${IMDS_TOKEN}" | grep "ANKA_")" 
   ]]; then
     echo "Could not find any user-data for instance..."
-    sleep 60
+    # Wait up to 10 minutes (600 seconds) for the agent socket file to appear before disjoining.
+    # avoiding Warning: Failed to communicate with agent: agent socket not found at /tmp/anka_agent.sock (agent may not be running)
+    SOCKET_PATH="/tmp/anka_agent.sock"
+    TIMEOUT=600
+    INTERVAL=5
+    waited=0
+    while [[ ! -e "$SOCKET_PATH" && $waited -lt $TIMEOUT ]]; do
+      sleep $INTERVAL
+      ((waited += INTERVAL))
+    done
     disjoin || true
     exit
   fi
