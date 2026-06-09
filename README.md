@@ -52,4 +52,4 @@ This should install everything you need (the script is idempotent). You can then
 
 ## Usage of AMI
 
-[Please see the documentaion!](https://docs.veertu.com/anka/intel/getting-started/aws-ec2-mac/)
+[Please see the documentaion!](https://docs.veertu.com/anka/aws-ec2-mac/)
