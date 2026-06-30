@@ -83,6 +83,12 @@ if [[ -n "${LAUNCHCTL_RESULT}" ]]; then
     launchctl unload -w /Library/LaunchDaemons/com.amazon.ec2.instance-storage-disk-mounter.plist
     echo "Amazon script that mounts the instance storage disk as /Volumes/ephemeral0 unloaded."
 
+    echo "Waiting for any in-flight instance storage mount to settle..."
+    for _ in {1..30}; do
+        mount | grep -q "/Volumes/ephemeral0" && break
+        sleep 1
+    done
+
     # Erase and format the disk if it's mounted as /Volumes/ephemeral0
     if mount | grep -q "/Volumes/ephemeral0"; then
         apfs_store=$(diskutil list "${EXTERNAL_DEVICE}" | awk '/Apple_APFS/ {print $NF; exit}')
