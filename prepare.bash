@@ -122,5 +122,9 @@ sudo anka config send_buffer_size 16777216
 anka config recv_buffer_size 16777216
 anka config send_buffer_size 16777216
 
+# Post-3.9.2., we fixed a bug with performance on EBS volumes. We need to enable it.
+sudo anka config block_nocache 2
+anka config block_nocache 2
+
 echo "done" > ~/prep
 unset HISTFILE
