@@ -16,6 +16,12 @@ source ~/.zshrc || true
 
 [[ -f "./${AMI_MACOS_TARGET_VERSION}.bash" ]] && ./"${AMI_MACOS_TARGET_VERSION}".bash
 
+if [[ "$(sw_vers -productVersion | cut -d. -f1)" == "26" ]]; then
+  curl -fL --retry 3 "https://downloads.veertu.com/anka/MobileDevice-27.pkg" -o "/tmp/MobileDevice-27.pkg"
+  sudo installer -pkg "/tmp/MobileDevice-27.pkg" -tgt /
+  rm -f "/tmp/MobileDevice-27.pkg"
+fi
+
 # Install resize disk plist
 [[ ! -e "${RESIZE_DISK_PLIST_PATH}" ]] && sudo -E bash -c "pwd; ./resize-disk.bash"
 
